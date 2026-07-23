@@ -42,12 +42,44 @@ const Login = () => {
 };
 
 const styles = {
-  container: { maxWidth: '400px', margin: '50px auto', padding: '20px', textAlign: 'center', fontFamily: 'Arial' },
-  title: { color: '#2c3e50' },
+  page: { 
+    minHeight: '100vh', 
+    backgroundColor: '#0a192f', 
+    display: 'flex', 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  loginBox: {
+    backgroundColor: '#112240', 
+    padding: '40px',
+    borderRadius: '10px',
+    width: '90%',
+    maxWidth: '400px',
+    textAlign: 'center',
+    boxShadow: '0 0 15px 4px rgba(0, 255, 255, 0.3)', // Cyan glow
+    border: '1px solid #00FFFF' // Cyan border
+  },
+  title: { color: '#00FFFF', marginBottom: '20px', fontFamily: 'Arial' }, // CYAN TEXT
   form: { display: 'flex', flexDirection: 'column', gap: '15px' },
-  input: { padding: '12px', fontSize: '16px', borderRadius: '5px', border: '1px solid #ccc' },
-  button: { padding: '12px', fontSize: '16px', borderRadius: '5px', border: 'none', backgroundColor: '#3498db', color: 'white', cursor: 'pointer' },
-  footer: { marginTop: '20px', color: '#7f8c8d', fontSize: '14px' }
+  input: { 
+    padding: '12px', 
+    fontSize: '16px', 
+    borderRadius: '5px', 
+    border: '1px solid #00FFFF', 
+    backgroundColor: '#0a192f', 
+    color: '#00FFFF' // CYAN TEXT
+  },
+  button: { 
+    padding: '12px', 
+    fontSize: '16px', 
+    borderRadius: '5px', 
+    border: 'none', 
+    backgroundColor: '#00FFFF', 
+    color: '#0a192f', 
+    cursor: 'pointer',
+    fontWeight: 'bold'
+  },
+  footer: { marginTop: '20px', color: '#00FFFF', fontSize: '14px' } // CYAN TEXT
 };
 
 export default Login;

@@ -56,7 +56,7 @@ const Dashboard = () => {
         <button onClick={logout} style={styles.logoutBtn}>Logout</button>
       </div>
 
-      <p style={{ color: '#7f8c8d' }}>Welcome, {user?.full_name}!</p>
+      <p style={{ color: '#00FFFF' }}>Welcome, {user?.full_name}!</p>
 
       <button onClick={() => setView('reception')} style={styles.receptionBtn}>
         Go to Reception Desk
@@ -85,7 +85,7 @@ const Dashboard = () => {
       <div style={styles.card}>
         <h3>Active Hospitals ({hospitals.length})</h3>
         {hospitals.length === 0 ? (
-          <p style={{ color: '#95a5a6' }}>No hospitals registered yet.</p>
+          <p style={{ color: '#00FFFF' }}>No hospitals registered yet.</p>
         ) : (
           <div style={styles.list}>
             {hospitals.map((hosp) => (
@@ -101,7 +101,7 @@ const Dashboard = () => {
         )}
       </div>
 
-      <p style={{ color: '#27ae60', marginTop: '20px', fontSize: '14px' }}>
+      <p style={{ color: '#2ecc71', marginTop: '20px', fontSize: '14px' }}>
         5-Minute Auto-Logout is ACTIVE.
       </p>
     </div>
@@ -116,13 +116,13 @@ const styles = {
     fontFamily: 'Arial, sans-serif', 
     backgroundColor: '#0a192f', 
     minHeight: '100vh', 
-    color: '#00FFFF' // CYAN TEXT
+    color: '#00FFFF' 
   },
   header: { 
     display: 'flex', 
     justifyContent: 'space-between', 
     alignItems: 'center', 
-    borderBottom: '2px solid #00FFFF', // Cyan line
+    borderBottom: '2px solid #00FFFF', 
     paddingBottom: '10px' 
   },
   logoutBtn: { 
@@ -160,7 +160,7 @@ const styles = {
     borderRadius: '5px', 
     border: '1px solid #00FFFF', 
     backgroundColor: '#0a192f', 
-    color: '#00FFFF' // CYAN TEXT
+    color: '#00FFFF' 
   },
   addButton: { 
     padding: '10px', 
@@ -181,7 +181,9 @@ const styles = {
     borderRadius: '5px', 
     border: '1px solid #233554' 
   },
-  hospName: { fontSize: '16px', color: '#00FFFF' }, // CYAN TEXT
-  hospTier: { fontSize: '12px', color: '#00FFFF', margin: '5px 0 0 0' }, // CYAN TEXT
+  hospName: { fontSize: '16px', color: '#00FFFF' }, 
+  hospTier: { fontSize: '12px', color: '#00FFFF', margin: '5px 0 0 0' }, 
   statusBadge: { backgroundColor: '#2ecc71', color: 'white', padding: '4px 8px', borderRadius: '12px', fontSize: '12px' }
 };
+
+export default Dashboard;

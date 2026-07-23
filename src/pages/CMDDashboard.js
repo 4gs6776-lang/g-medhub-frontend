@@ -9,127 +9,86 @@ const CMDDashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const [view, setView] = useState('dashboard');
 
-  if (view === 'reception') {
+  // This decides what content to show in the main area
+  const renderContent = () => {
+    if (view === 'reception') return <Reception />;
+    if (view === 'doctor') return <Doctor />;
+    if (view === 'lab') return <Lab />;
+    if (view === 'pharmacy') return <Pharmacy />;
+    
+    // Default Dashboard View
     return (
       <div>
-        <div style={{textAlign: 'center', marginTop: '20px'}}>
-          <button onClick={() => setView('dashboard')} style={{padding: '10px 20px', backgroundColor: '#7f8c8d', color: 'white', border: 'none', borderRadius: '5px'}}>
-            ⬅ Back to CMD Dashboard
-          </button>
+        <h2>Hospital Overview</h2>
+        <p style={{ color: '#8892b0' }}>Welcome back, {user?.full_name}!</p>
+        
+        <div style={styles.statsGrid}>
+          <div style={styles.statCard}>
+            <h3 style={{color: '#00FFFF', margin: 0}}>0</h3>
+            <p style={{color: '#8892b0', margin: '5px 0 0 0'}}>Total Patients</p>
+          </div>
+          <div style={styles.statCard}>
+            <h3 style={{color: '#00FFFF', margin: 0}}>0</h3>
+            <p style={{color: '#8892b0', margin: '5px 0 0 0'}}>Lab Tests Today</p>
+          </div>
         </div>
-        <Reception />
       </div>
     );
-  }
-
-  if (view === 'doctor') {
-    return (
-      <div>
-        <div style={{textAlign: 'center', marginTop: '20px'}}>
-          <button onClick={() => setView('dashboard')} style={{padding: '10px 20px', backgroundColor: '#7f8c8d', color: 'white', border: 'none', borderRadius: '5px'}}>
-            ⬅ Back to CMD Dashboard
-          </button>
-        </div>
-        <Doctor />
-      </div>
-    );
-  }
-
-  if (view === 'lab') {
-    return (
-      <div>
-        <div style={{textAlign: 'center', marginTop: '20px'}}>
-          <button onClick={() => setView('dashboard')} style={{padding: '10px 20px', backgroundColor: '#7f8c8d', color: 'white', border: 'none', borderRadius: '5px'}}>
-            ⬅ Back to CMD Dashboard
-          </button>
-        </div>
-        <Lab />
-      </div>
-    );
-  }
-
-  if (view === 'pharmacy') {
-    return (
-      <div>
-        <div style={{textAlign: 'center', marginTop: '20px'}}>
-          <button onClick={() => setView('dashboard')} style={{padding: '10px 20px', backgroundColor: '#7f8c8d', color: 'white', border: 'none', borderRadius: '5px'}}>
-            ⬅ Back to CMD Dashboard
-          </button>
-        </div>
-        <Pharmacy />
-      </div>
-    );
-  }
+  };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h2>Hallel Hospital & Maternity</h2>
-        <button onClick={logout} style={styles.logoutBtn}>Logout</button>
+    <div style={styles.layout}>
+      {/* Sidebar */}
+      <div style={styles.sidebar}>
+        <h2 style={styles.sidebarTitle}>G-MedHub</h2>
+        <p style={styles.sidebarSub}>Hallel Hospital</p>
+        
+        <nav style={styles.nav}>
+          <button onClick={() => setView('dashboard')} style={view === 'dashboard' ? styles.navActive : styles.navItem}>Dashboard</button>
+          <button onClick={() => setView('reception')} style={view === 'reception' ? styles.navActive : styles.navItem}>Reception</button>
+          <button onClick={() => setView('doctor')} style={view === 'doctor' ? styles.navActive : styles.navItem}>Doctor</button>
+          <button onClick={() => setView('lab')} style={view === 'lab' ? styles.navActive : styles.navItem}>Laboratory</button>
+          <button onClick={() => setView('pharmacy')} style={view === 'pharmacy' ? styles.navActive : styles.navItem}>Pharmacy</button>
+        </nav>
       </div>
 
-      <p style={{ color: '#00FFFF' }}>Welcome, {user?.full_name}! (Chief Medical Director)</p>
+      {/* Main Content Area */}
+      <div style={styles.mainArea}>
+        {/* Top Header */}
+        <div style={styles.header}>
+          <span style={{color: '#00FFFF', fontWeight: 'bold'}}>{view.charAt(0).toUpperCase() + view.slice(1)}</span>
+          <button onClick={logout} style={styles.logoutBtn}>Logout</button>
+        </div>
 
-      <div style={styles.card}>
-        <h3>Hospital Departments</h3>
-        <button onClick={() => setView('reception')} style={styles.navBtn}>Go to Reception Desk</button>
-        <button onClick={() => setView('doctor')} style={styles.navBtn}>Go to Doctor's Desk</button>
-        <button onClick={() => setView('lab')} style={styles.navBtn}>Go to Laboratory Desk</button>
-        <button onClick={() => setView('pharmacy')} style={styles.navBtn}>Go to Pharmacy Desk</button>
+        {/* Page Content */}
+        <div style={styles.content}>
+          {renderContent()}
+        </div>
       </div>
-
-      <p style={{ color: '#2ecc71', marginTop: '20px', fontSize: '14px' }}>
-        5-Minute Auto-Logout is ACTIVE.
-      </p>
     </div>
   );
 };
 
 const styles = {
-  container: { 
-    maxWidth: '600px', 
-    margin: '0 auto', 
-    padding: '20px', 
-    fontFamily: 'Arial, sans-serif', 
-    backgroundColor: '#0a192f', 
-    minHeight: '100vh', 
-    color: '#00FFFF' 
-  },
-  header: { 
-    display: 'flex', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    borderBottom: '2px solid #00FFFF', 
-    paddingBottom: '10px' 
-  },
-  logoutBtn: { 
-    padding: '8px 16px', 
-    backgroundColor: '#e74c3c', 
-    color: 'white', 
-    border: 'none', 
-    borderRadius: '5px', 
-    cursor: 'pointer' 
-  },
-  card: { 
-    backgroundColor: '#112240', 
-    padding: '20px', 
-    borderRadius: '8px', 
-    marginTop: '20px', 
-    boxShadow: '0 4px 6px rgba(0,0,0,0.3)', 
-    border: '1px solid #233554'
-  },
-  navBtn: { 
-    width: '100%', 
-    padding: '15px', 
-    backgroundColor: '#00FFFF', 
-    color: '#0a192f', 
-    border: 'none', 
-    borderRadius: '8px', 
-    fontSize: '16px', 
-    cursor: 'pointer', 
-    marginBottom: '10px',
-    fontWeight: 'bold'
-  }
+  layout: { display: 'flex', minHeight: '100vh', backgroundColor: '#0a192f', color: '#00FFFF', fontFamily: 'Arial' },
+  
+  // Sidebar Styles
+  sidebar: { width: '220px', backgroundColor: '#112240', padding: '20px', boxSizing: 'border-box', borderRight: '1px solid #233554' },
+  sidebarTitle: { margin: 0, color: '#00FFFF', fontSize: '20px' },
+  sidebarSub: { margin: '5px 0 20px 0', color: '#8892b0', fontSize: '12px' },
+  nav: { display: 'flex', flexDirection: 'column', gap: '5px' },
+  navItem: { textAlign: 'left', padding: '12px', backgroundColor: 'transparent', color: '#8892b0', border: 'none', borderBottom: '1px solid #233554', cursor: 'pointer', fontSize: '15px' },
+  navActive: { textAlign: 'left', padding: '12px', backgroundColor: '#00FFFF', color: '#0a192f', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '15px', fontWeight: 'bold' },
+
+  // Main Area Styles
+  mainArea: { flex: 1, display: 'flex', flexDirection: 'column' },
+  header: { height: '60px', backgroundColor: '#112240', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', borderBottom: '1px solid #233554' },
+  logoutBtn: { padding: '8px 16px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' },
+  content: { padding: '20px', flex: 1 },
+  
+  // Stats Cards
+  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px', marginTop: '20px' },
+  statCard: { backgroundColor: '#112240', padding: '20px', borderRadius: '8px', border: '1px solid #233554' }
 };
 
 export default CMDDashboard;

@@ -152,6 +152,7 @@ const styles = {
   hospName: { fontSize: '16px', color: '#2c3e50' },
   hospTier: { fontSize: '12px', color: '#7f8c8d', margin: '5px 0 0 0' },
   statusBadge: { backgroundColor: '#2ecc71', color: 'white', padding: '4px 8px', borderRadius: '12px', fontSize: '12px' }
+    receptionBtn: { width: '100%', padding: '15px', backgroundColor: '#9b59b6', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '20px' }
 };
 
 export default Dashboard;

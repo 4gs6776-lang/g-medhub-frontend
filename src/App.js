@@ -1,11 +1,15 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { AuthContext } from './context/AuthContext';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
 
 function App() {
+  const { token } = useContext(AuthContext);
+
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px' }}>
-      <h1>Welcome to G-MedHub</h1>
-      <p>Hospital Management System</p>
-      <p>Frontend is successfully running!</p>
+    <div>
+      {/* If the user has a token, show Dashboard. If not, show Login. */}
+      {token ? <Dashboard /> : <Login />}
     </div>
   );
 }

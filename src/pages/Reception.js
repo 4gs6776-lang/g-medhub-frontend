@@ -6,22 +6,19 @@ const Reception = () => {
   const { user } = useContext(AuthContext);
   const API_URL = process.env.REACT_APP_API_URL;
   
-  // Form state
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [gender, setGender] = useState('Male');
   const [age, setAge] = useState('');
   
-  // Search state
   const [search, setSearch] = useState('');
   const [results, setResults] = useState([]);
 
-  // Register a new patient
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post(`${API_URL}/api/patients/register`, {
-        hospital_id: user.hospital_id, // Attaches patient to YOUR hospital
+        hospital_id: user.hospital_id, 
         full_name: name, 
         phone, 
         gender, 
@@ -34,7 +31,6 @@ const Reception = () => {
     }
   };
 
-  // Search for a patient
   const handleSearch = async (e) => {
     e.preventDefault();
     try {
@@ -49,7 +45,6 @@ const Reception = () => {
     <div style={styles.container}>
       <h2 style={styles.title}>Reception Desk</h2>
       
-      {/* Registration Form */}
       <div style={styles.card}>
         <h3>Register New Patient</h3>
         <form onSubmit={handleRegister} style={styles.form}>
@@ -64,7 +59,6 @@ const Reception = () => {
         </form>
       </div>
 
-      {/* Search Bar */}
       <div style={styles.card}>
         <h3>Patient Search</h3>
         <form onSubmit={handleSearch} style={styles.form}>
@@ -72,15 +66,14 @@ const Reception = () => {
           <button type="submit" style={styles.searchBtn}>Search</button>
         </form>
         
-        {/* Search Results */}
         <div style={{ marginTop: '15px' }}>
           {results.map((p) => (
             <div key={p.id} style={styles.resultItem}>
               <strong>GMH-{p.id}</strong> - {p.full_name} <br/>
-              <span style={{color:'#7f8c8d', fontSize:'14px'}}>{p.phone} | {p.gender} | {p.age}y</span>
+              <span style={{color:'#00FFFF', fontSize:'14px'}}>{p.phone} | {p.gender} | {p.age}y</span>
             </div>
           ))}
-          {results.length === 0 && <p style={{color:'#95a5a6', fontSize:'14px'}}>No results yet.</p>}
+          {results.length === 0 && <p style={{color:'#00FFFF', fontSize:'14px'}}>No results yet.</p>}
         </div>
       </div>
     </div>
@@ -97,3 +90,5 @@ const styles = {
   searchBtn: { padding: '10px', backgroundColor: '#00FFFF', color: '#0a192f', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' },
   resultItem: { backgroundColor: '#0a192f', padding: '10px', borderRadius: '5px', marginBottom: '5px', border: '1px solid #233554', color: '#00FFFF' }
 };
+
+export default Reception;

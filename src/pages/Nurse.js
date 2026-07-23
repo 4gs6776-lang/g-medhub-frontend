@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 
@@ -10,7 +10,7 @@ const Nurse = () => {
   const [results, setResults] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   
-  const [vitals, setVitals] = useState({ temp: '', pulse: '', resp: '', bp: '', o2: '' });
+  const [vitals, setVitals] = useState({ temp: '', hr: '', resp: '', bp: '', weight: '', o2: '' });
   const [notes, setNotes] = useState('');
   const [history, setHistory] = useState([]);
 
@@ -44,14 +44,15 @@ const Nurse = () => {
         patient_id: selectedPatient.id,
         nurse_id: user.id,
         temperature: vitals.temp,
-        pulse: vitals.pulse,
+        heart_rate: vitals.hr,
         respiration: vitals.resp,
         blood_pressure: vitals.bp,
+        body_weight: vitals.weight,
         oxygen_saturation: vitals.o2,
         nursing_notes: notes
       });
       alert('Vitals and notes saved successfully!');
-      setVitals({ temp: '', pulse: '', resp: '', bp: '', o2: '' });
+      setVitals({ temp: '', hr: '', resp: '', bp: '', weight: '', o2: '' });
       setNotes('');
       
       const res = await axios.get(`${API_URL}/api/nurse/vitals/${selectedPatient.id}`);
@@ -96,11 +97,30 @@ const Nurse = () => {
             <h3>Record Vitals & Notes</h3>
             <form onSubmit={handleSaveVitals} style={styles.form}>
               <div style={styles.vitalsGrid}>
-                <input type="text" placeholder="Temp (°C)" value={vitals.temp} onChange={(e) => setVitals({...vitals, temp: e.target.value})} style={styles.input} />
-                <input type="text" placeholder="Pulse (bpm)" value={vitals.pulse} onChange={(e) => setVitals({...vitals, pulse: e.target.value})} style={styles.input} />
-                <input type="text" placeholder="Resp (/min)" value={vitals.resp} onChange={(e) => setVitals({...vitals, resp: e.target.value})} style={styles.input} />
-                <input type="text" placeholder="BP (mmHg)" value={vitals.bp} onChange={(e) => setVitals({...vitals, bp: e.target.value})} style={styles.input} />
-                <input type="text" placeholder="O2 Sat (%)" value={vitals.o2} onChange={(e) => setVitals({...vitals, o2: e.target.value})} style={styles.input} />
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Temp (°C)</label>
+                  <input type="text" placeholder="36.5" value={vitals.temp} onChange={(e) => setVitals({...vitals, temp: e.target.value})} style={styles.input} />
+                </div>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>BP (mmHg)</label>
+                  <input type="text" placeholder="120/80" value={vitals.bp} onChange={(e) => setVitals({...vitals, bp: e.target.value})} style={styles.input} />
+                </div>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Resp (rpm)</label>
+                  <input type="text" placeholder="16" value={vitals.resp} onChange={(e) => setVitals({...vitals, resp: e.target.value})} style={styles.input} />
+                </div>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>HR (bpm)</label>
+                  <input type="text" placeholder="72" value={vitals.hr} onChange={(e) => setVitals({...vitals, hr: e.target.value})} style={styles.input} />
+                </div>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>Weight (kg)</label>
+                  <input type="text" placeholder="70" value={vitals.weight} onChange={(e) => setVitals({...vitals, weight: e.target.value})} style={styles.input} />
+                </div>
+                <div style={styles.inputGroup}>
+                  <label style={styles.label}>SpO2 (%)</label>
+                  <input type="text" placeholder="98" value={vitals.o2} onChange={(e) => setVitals({...vitals, o2: e.target.value})} style={styles.input} />
+                </div>
               </div>
               <textarea placeholder="Nursing Notes (e.g., Patient complains of headache...)" value={notes} onChange={(e) => setNotes(e.target.value)} style={styles.textarea} required />
               <button type="submit" style={styles.button}>Save Record</button>
@@ -116,7 +136,7 @@ const Nurse = () => {
                 <div key={h.id} style={styles.historyItem}>
                   <p style={{margin:'0 0 5px 0', fontSize:'14px', color:'#8892b0'}}>{new Date(h.created_at).toLocaleString()}</p>
                   <p style={{margin:'0 0 5px 0'}}>
-                    <strong>Vitals:</strong> T: {h.temperature} | P: {h.pulse} | R: {h.respiration} | BP: {h.blood_pressure} | O2: {h.oxygen_saturation}
+                    <strong>Vitals:</strong> T: {h.temperature}°C | BP: {h.blood_pressure} | HR: {h.pulse}bpm | Resp: {h.respiration} | SpO2: {h.oxygen_saturation}% | Wt: {h.body_weight}kg
                   </p>
                   <p style={{margin:0}}><strong>Notes:</strong> {h.nursing_notes}</p>
                 </div>
@@ -133,8 +153,10 @@ const styles = {
   container: { maxWidth: '800px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif', backgroundColor: '#0a192f', minHeight: '100vh', color: '#00FFFF' },
   title: { color: '#00FFFF', borderBottom: '2px solid #00FFFF', paddingBottom: '10px' },
   card: { backgroundColor: '#112240', padding: '20px', borderRadius: '8px', marginTop: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '1px solid #233554' },
-  form: { display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' },
-  vitalsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' },
+  form: { display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '10px' },
+  vitalsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' },
+  inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px' },
+  label: { fontSize: '14px', color: '#8892b0' },
   input: { padding: '10px', fontSize: '16px', borderRadius: '5px', border: '1px solid #00FFFF', backgroundColor: '#0a192f', color: '#00FFFF' },
   textarea: { padding: '10px', fontSize: '16px', borderRadius: '5px', border: '1px solid #00FFFF', backgroundColor: '#0a192f', color: '#00FFFF', minHeight: '80px' },
   button: { padding: '10px', backgroundColor: '#00FFFF', color: '#0a192f', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' },

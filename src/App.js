@@ -7,7 +7,7 @@ function App() {
   const { token } = useContext(AuthContext);
 
   return (
-    <div>
+    <div style={{ backgroundColor: '#0a192f', minHeight: '100vh' }}>
       {/* If the user has a token, show Dashboard. If not, show Login. */}
       {token ? <Dashboard /> : <Login />}
     </div>

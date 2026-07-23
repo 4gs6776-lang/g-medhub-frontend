@@ -4,6 +4,7 @@ import { AuthContext } from '../context/AuthContext';
 import Reception from './Reception';
 import Doctor from './Doctor';
 import Lab from './Lab';
+import Pharmacy from './Pharmacy';
 
 const Dashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -77,6 +78,19 @@ const Dashboard = () => {
     );
   }
 
+  if (view === 'pharmacy') {
+    return (
+      <div>
+        <div style={{textAlign: 'center', marginTop: '20px'}}>
+          <button onClick={() => setView('admin')} style={{padding: '10px 20px', backgroundColor: '#7f8c8d', color: 'white', border: 'none', borderRadius: '5px'}}>
+            ⬅ Back to Admin Dashboard
+          </button>
+        </div>
+        <Pharmacy />
+      </div>
+    );
+  }
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -94,6 +108,9 @@ const Dashboard = () => {
       </button>
       <button onClick={() => setView('lab')} style={styles.navBtn}>
         Go to Laboratory Desk
+      </button>
+      <button onClick={() => setView('pharmacy')} style={styles.navBtn}>
+        Go to Pharmacy Desk
       </button>
 
       <div style={styles.card}>

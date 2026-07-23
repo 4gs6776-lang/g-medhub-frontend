@@ -1,7 +1,7 @@
-import Reception from './Reception';
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import Reception from './Reception';
 
 const Dashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -11,7 +11,6 @@ const Dashboard = () => {
   const [view, setView] = useState('admin');
   const API_URL = process.env.REACT_APP_API_URL;
 
-  // Fetch all hospitals when the page loads
   const fetchHospitals = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/hospitals`);
@@ -25,20 +24,19 @@ const Dashboard = () => {
     fetchHospitals();
   }, []);
 
-  // Add a new hospital
   const handleAddHospital = async (e) => {
     e.preventDefault();
     try {
       await axios.post(`${API_URL}/api/hospitals`, { name, subscription_tier: tier });
       setName('');
-      fetchHospitals(); // Refresh the list
+      fetchHospitals();
       alert('Hospital added successfully!');
     } catch (err) {
       alert('Failed to add hospital');
     }
   };
 
-    if (view === 'reception') {
+  if (view === 'reception') {
     return (
       <div>
         <div style={{textAlign: 'center', marginTop: '20px'}}>
@@ -60,12 +58,10 @@ const Dashboard = () => {
 
       <p style={{ color: '#7f8c8d' }}>Welcome, {user?.full_name}!</p>
 
-      {/* Navigation Button to Reception */}
       <button onClick={() => setView('reception')} style={styles.receptionBtn}>
         Go to Reception Desk
       </button>
 
-      {/* Add Hospital Form */}
       <div style={styles.card}>
         <h3>Register New Hospital</h3>
         <form onSubmit={handleAddHospital} style={styles.form}>
@@ -86,33 +82,6 @@ const Dashboard = () => {
         </form>
       </div>
 
-      {/* List of Hospitals */}
-      <div style={styles.card}>
-        <h3>Active Hospitals ({hospitals.length})</h3>
-        {hospitals.length === 0 ? (
-          <p style={{ color: '#95a5a6' }}>No hospitals registered yet.</p>
-        ) : (
-          <div style={styles.list}>
-            {hospitals.map((hosp) => (
-              <div key={hosp.id} style={styles.hospItem}>
-                <div>
-                  <strong style={styles.hospName}>{hosp.name}</strong>
-                  <p style={styles.hospTier}>Tier: {hosp.subscription_tier}</p>
-                </div>
-                <span style={styles.statusBadge}>{hosp.status}</span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <p style={{ color: '#27ae60', marginTop: '20px', fontSize: '14px' }}>
-        5-Minute Auto-Logout is ACTIVE.
-      </p>
-    </div>
-  );
-
-      {/* List of Hospitals */}
       <div style={styles.card}>
         <h3>Active Hospitals ({hospitals.length})</h3>
         {hospitals.length === 0 ? (
@@ -143,6 +112,7 @@ const styles = {
   container: { maxWidth: '600px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #3498db', paddingBottom: '10px' },
   logoutBtn: { padding: '8px 16px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' },
+  receptionBtn: { width: '100%', padding: '15px', backgroundColor: '#9b59b6', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '20px' },
   card: { backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '8px', marginTop: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
   form: { display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' },
   input: { padding: '10px', fontSize: '16px', borderRadius: '5px', border: '1px solid #ccc' },
@@ -152,7 +122,6 @@ const styles = {
   hospName: { fontSize: '16px', color: '#2c3e50' },
   hospTier: { fontSize: '12px', color: '#7f8c8d', margin: '5px 0 0 0' },
   statusBadge: { backgroundColor: '#2ecc71', color: 'white', padding: '4px 8px', borderRadius: '12px', fontSize: '12px' }
-    receptionBtn: { width: '100%', padding: '15px', backgroundColor: '#9b59b6', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer', marginBottom: '20px' }
 };
 
 export default Dashboard;

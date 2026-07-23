@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import Reception from './Reception';
+import Doctor from './Doctor';
 
 const Dashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -49,6 +50,19 @@ const Dashboard = () => {
     );
   }
 
+  if (view === 'doctor') {
+    return (
+      <div>
+        <div style={{textAlign: 'center', marginTop: '20px'}}>
+          <button onClick={() => setView('admin')} style={{padding: '10px 20px', backgroundColor: '#7f8c8d', color: 'white', border: 'none', borderRadius: '5px'}}>
+            ⬅ Back to Admin Dashboard
+          </button>
+        </div>
+        <Doctor />
+      </div>
+    );
+  }
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -58,8 +72,11 @@ const Dashboard = () => {
 
       <p style={{ color: '#00FFFF' }}>Welcome, {user?.full_name}!</p>
 
-      <button onClick={() => setView('reception')} style={styles.receptionBtn}>
+      <button onClick={() => setView('reception')} style={styles.navBtn}>
         Go to Reception Desk
+      </button>
+      <button onClick={() => setView('doctor')} style={styles.navBtn}>
+        Go to Doctor's Desk
       </button>
 
       <div style={styles.card}>
@@ -133,7 +150,7 @@ const styles = {
     borderRadius: '5px', 
     cursor: 'pointer' 
   },
-  receptionBtn: { 
+  navBtn: { 
     width: '100%', 
     padding: '15px', 
     backgroundColor: '#00FFFF', 
@@ -142,7 +159,7 @@ const styles = {
     borderRadius: '8px', 
     fontSize: '16px', 
     cursor: 'pointer', 
-    marginBottom: '20px',
+    marginBottom: '10px',
     fontWeight: 'bold'
   },
   card: { 

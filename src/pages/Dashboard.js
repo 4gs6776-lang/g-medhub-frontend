@@ -8,6 +8,7 @@ const Dashboard = () => {
   const [hospitals, setHospitals] = useState([]);
   const [name, setName] = useState('');
   const [tier, setTier] = useState('Basic');
+  const [view, setView] = useState('admin');
   const API_URL = process.env.REACT_APP_API_URL;
 
   // Fetch all hospitals when the page loads
@@ -37,6 +38,19 @@ const Dashboard = () => {
     }
   };
 
+    if (view === 'reception') {
+    return (
+      <div>
+        <div style={{textAlign: 'center', marginTop: '20px'}}>
+          <button onClick={() => setView('admin')} style={{padding: '10px 20px', backgroundColor: '#7f8c8d', color: 'white', border: 'none', borderRadius: '5px'}}>
+            ⬅ Back to Admin Dashboard
+          </button>
+        </div>
+        <Reception />
+      </div>
+    );
+  }
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -45,6 +59,11 @@ const Dashboard = () => {
       </div>
 
       <p style={{ color: '#7f8c8d' }}>Welcome, {user?.full_name}!</p>
+
+      {/* Navigation Button to Reception */}
+      <button onClick={() => setView('reception')} style={styles.receptionBtn}>
+        Go to Reception Desk
+      </button>
 
       {/* Add Hospital Form */}
       <div style={styles.card}>
@@ -66,6 +85,32 @@ const Dashboard = () => {
           <button type="submit" style={styles.addButton}>Add Hospital</button>
         </form>
       </div>
+
+      {/* List of Hospitals */}
+      <div style={styles.card}>
+        <h3>Active Hospitals ({hospitals.length})</h3>
+        {hospitals.length === 0 ? (
+          <p style={{ color: '#95a5a6' }}>No hospitals registered yet.</p>
+        ) : (
+          <div style={styles.list}>
+            {hospitals.map((hosp) => (
+              <div key={hosp.id} style={styles.hospItem}>
+                <div>
+                  <strong style={styles.hospName}>{hosp.name}</strong>
+                  <p style={styles.hospTier}>Tier: {hosp.subscription_tier}</p>
+                </div>
+                <span style={styles.statusBadge}>{hosp.status}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <p style={{ color: '#27ae60', marginTop: '20px', fontSize: '14px' }}>
+        5-Minute Auto-Logout is ACTIVE.
+      </p>
+    </div>
+  );
 
       {/* List of Hospitals */}
       <div style={styles.card}>

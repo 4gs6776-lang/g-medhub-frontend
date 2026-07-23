@@ -88,14 +88,12 @@ const Reception = () => {
 };
 
 const styles = {
-  container: { maxWidth: '600px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif' },
-  title: { color: '#2c3e50', borderBottom: '2px solid #3498db', paddingBottom: '10px' },
-  card: { backgroundColor: '#f8f9fa', padding: '20px', borderRadius: '8px', marginTop: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
+  container: { maxWidth: '600px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif', backgroundColor: '#0a192f', minHeight: '100vh', color: '#00FFFF' },
+  title: { color: '#00FFFF', borderBottom: '2px solid #00FFFF', paddingBottom: '10px' },
+  card: { backgroundColor: '#112240', padding: '20px', borderRadius: '8px', marginTop: '20px', boxShadow: '0 2px 4px rgba(0,0,0,0.3)', border: '1px solid #233554' },
   form: { display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' },
-  input: { padding: '10px', fontSize: '16px', borderRadius: '5px', border: '1px solid #ccc' },
-  button: { padding: '10px', backgroundColor: '#2ecc71', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px' },
-  searchBtn: { padding: '10px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px' },
-  resultItem: { backgroundColor: 'white', padding: '10px', borderRadius: '5px', marginBottom: '5px', border: '1px solid #eee' }
+  input: { padding: '10px', fontSize: '16px', borderRadius: '5px', border: '1px solid #00FFFF', backgroundColor: '#0a192f', color: '#00FFFF' },
+  button: { padding: '10px', backgroundColor: '#00FFFF', color: '#0a192f', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' },
+  searchBtn: { padding: '10px', backgroundColor: '#00FFFF', color: '#0a192f', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' },
+  resultItem: { backgroundColor: '#0a192f', padding: '10px', borderRadius: '5px', marginBottom: '5px', border: '1px solid #233554', color: '#00FFFF' }
 };
-
-export default Reception;

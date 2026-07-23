@@ -9,7 +9,6 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('gmedhub_token'));
   const timerRef = useRef(null);
 
-  // Setup Axios to always send the token
   if (token) {
     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
   }
@@ -23,7 +22,6 @@ export const AuthProvider = ({ children }) => {
     alert('You have been logged out due to 5 minutes of inactivity.');
   };
 
-  // The 5-Minute Auto-Logout Logic
   const resetTimeout = () => {
     if (timerRef.current) clearTimeout(timerRef.current);
     // 5 minutes = 300000 milliseconds
@@ -32,11 +30,10 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      // Events that reset the timer (clicking, typing, scrolling)
       window.addEventListener('mousemove', resetTimeout);
       window.addEventListener('keydown', resetTimeout);
       window.addEventListener('click', resetTimeout);
-      resetTimeout(); // Start the timer immediately on login
+      resetTimeout(); 
 
       const savedUser = localStorage.getItem('gmedhub_user');
       if (savedUser) setUser(JSON.parse(savedUser));

@@ -11,6 +11,7 @@ import Appointments from './Appointments';
 import DrugChart from './DrugChart';
 import Patients from './Patients';
 import Maternity from './Maternity';
+import Roster from './Roster';
 
 const CMDDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -33,20 +34,15 @@ const CMDDashboard = () => {
           setStats(statsRes.data);
           
           const apptsRes = await axios.get(`${API_URL}/api/appointments?hospital_id=${user.hospital_id}`);
-          setRecentAppts(apptsRes.data.slice(0, 5)); // Get latest 5 appointments
+          setRecentAppts(apptsRes.data.slice(0, 5));
         } catch (err) {
           console.error('Failed to fetch dashboard data');
         }
       }
     };
     
-    // Fetch immediately
     fetchDashboardData();
-    
-    // Set up auto-refresh every 2 seconds (2000ms) for live updates
     const interval = setInterval(fetchDashboardData, 2000);
-    
-    // Clean up interval when view changes
     return () => clearInterval(interval);
   }, [user, view, API_URL]);
 
@@ -66,11 +62,10 @@ const CMDDashboard = () => {
     if (view === 'drugchart') return <DrugChart />;
     if (view === 'patients') return <Patients />;
     if (view === 'maternity') return <Maternity />;
+    if (view === 'roster') return <Roster />;
     
-    // Premium Dashboard View
     return (
       <div style={styles.dashboardContainer}>
-        {/* Welcome Banner */}
         <div style={styles.welcomeBanner}>
           <div>
             <h1 style={styles.bannerTitle}>Hello, {user?.full_name}! 👋</h1>
@@ -79,7 +74,6 @@ const CMDDashboard = () => {
           <div style={styles.bannerIcon}>🏥</div>
         </div>
 
-        {/* Stat Cards Grid */}
         <div style={styles.statsGrid}>
           <div style={styles.statCard}>
             <div style={{...styles.statIcon, background: 'rgba(0, 255, 255, 0.1)', color: '#00FFFF'}}>👥</div>
@@ -115,7 +109,6 @@ const CMDDashboard = () => {
         </div>
 
         <div style={styles.rowLayout}>
-          {/* Department Progress (Simulated) */}
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>Departmental Statistics</h3>
             <div style={styles.separator}></div>
@@ -137,7 +130,6 @@ const CMDDashboard = () => {
             </div>
           </div>
 
-          {/* Recent Appointments Table */}
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>Recent Appointments</h3>
             <div style={styles.separator}></div>
@@ -210,6 +202,7 @@ const CMDDashboard = () => {
           <button onClick={() => changeView('lab')} style={view === 'lab' ? styles.navActive : styles.navItem}>🧪 Laboratory</button>
           <button onClick={() => changeView('pharmacy')} style={view === 'pharmacy' ? styles.navActive : styles.navItem}>💊 Pharmacy</button>
           <button onClick={() => changeView('billing')} style={view === 'billing' ? styles.navActive : styles.navItem}>💳 Billing</button>
+          <button onClick={() => changeView('roster')} style={view === 'roster' ? styles.navActive : styles.navItem}>🗓️ Daily Roster</button>
         </nav>
 
         <button onClick={logout} style={styles.logoutBtn}>🚪 Logout</button>
@@ -269,7 +262,6 @@ const styles = {
   sidebarHeader: { marginBottom: '30px', textAlign: 'center' },
   sidebarTitle: { margin: 0, fontSize: '28px', fontWeight: '800', background: 'linear-gradient(90deg, #00FFFF, #D4AF37)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
   sidebarSub: { margin: '5px 0 0 0', color: '#8892b0', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' },
-  // Added overflowY: 'auto' and flex: 1 so the menu scrolls if there are too many buttons!
   nav: { display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, overflowY: 'auto', paddingBottom: '20px' },
   navItem: { textAlign: 'left', padding: '15px', backgroundColor: 'transparent', color: '#8892b0', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: '500', transition: 'all 0.3s ease' },
   navActive: { textAlign: 'left', padding: '15px', background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.05))', color: '#00FFFF', border: '1px solid rgba(0, 255, 255, 0.2)', borderRadius: '8px', cursor: 'pointer', fontSize: '15px', fontWeight: 'bold', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' },
@@ -279,7 +271,6 @@ const styles = {
   pageTitle: { fontSize: '24px', fontWeight: 'bold', color: '#e6f1ff', textTransform: 'capitalize' },
   content: { padding: window.innerWidth <= 768 ? '80px 15px 20px' : '40px', flex: 1 },
   
-  // Dashboard Specific Styles
   dashboardContainer: { animation: 'fadeIn 0.5s ease-in' },
   welcomeBanner: { 
     background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.1), rgba(17, 34, 64, 0.6))', 

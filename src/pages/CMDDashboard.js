@@ -14,6 +14,7 @@ import Maternity from './Maternity';
 import Roster from './Roster';
 import Ward from './Ward';
 import HMO from './HMO';
+import Reports from './Reports';
 
 const CMDDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -67,6 +68,7 @@ const CMDDashboard = () => {
     if (view === 'roster') return <Roster />;
     if (view === 'ward') return <Ward />;
     if (view === 'hmo') return <HMO />;
+    if (view === 'reports') return <Reports />;
     
     return (
       <div style={styles.dashboardContainer}>
@@ -196,6 +198,7 @@ const CMDDashboard = () => {
         
         <nav style={styles.nav}>
           <button onClick={() => changeView('dashboard')} style={view === 'dashboard' ? styles.navActive : styles.navItem}>✨ Dashboard</button>
+          <button onClick={() => changeView('reports')} style={view === 'reports' ? styles.navActive : styles.navItem}>📊 Reports</button>
           <button onClick={() => changeView('patients')} style={view === 'patients' ? styles.navActive : styles.navItem}>👥 Patient List</button>
           <button onClick={() => changeView('appointments')} style={view === 'appointments' ? styles.navActive : styles.navItem}>📅 Appointments</button>
           <button onClick={() => changeView('reception')} style={view === 'reception' ? styles.navActive : styles.navItem}>🏥 Reception</button>

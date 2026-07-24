@@ -22,19 +22,25 @@ const CMDDashboard = () => {
     pending_labs: 0,
     unpaid_bills: 0
   });
+  const [recentAppts, setRecentAppts] = useState([]);
   const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/stats?hospital_id=${user.hospital_id}`);
-        setStats(res.data);
-      } catch (err) {
-        console.error('Failed to fetch stats');
+    const fetchDashboardData = async () => {
+      if (view === 'dashboard') {
+        try {
+          const statsRes = await axios.get(`${API_URL}/api/stats?hospital_id=${user.hospital_id}`);
+          setStats(statsRes.data);
+          
+          const apptsRes = await axios.get(`${API_URL}/api/appointments?hospital_id=${user.hospital_id}`);
+          setRecentAppts(apptsRes.data.slice(0, 5)); // Get latest 5 appointments
+        } catch (err) {
+          console.error('Failed to fetch dashboard data');
+        }
       }
     };
-    if (view === 'dashboard') fetchStats();
-  }, [user, view]);
+    fetchDashboardData();
+  }, [user, view, API_URL]);
 
   const changeView = (newView) => {
     setView(newView);
@@ -53,14 +59,22 @@ const CMDDashboard = () => {
     if (view === 'patients') return <Patients />;
     if (view === 'maternity') return <Maternity />;
     
+    // Premium Dashboard View
     return (
-      <div style={styles.welcomeContainer}>
-        <h1 style={styles.welcomeTitle}>Welcome back, {user?.full_name}</h1>
-        <p style={styles.welcomeSub}>Here is the premium overview of Hallel Hospital today.</p>
-        
+      <div style={styles.dashboardContainer}>
+        {/* Welcome Banner */}
+        <div style={styles.welcomeBanner}>
+          <div>
+            <h1 style={styles.bannerTitle}>Hello, {user?.full_name}! 👋</h1>
+            <p style={styles.bannerSub}>Welcome back to Hallel Hospital. Here is what's happening today.</p>
+          </div>
+          <div style={styles.bannerIcon}>🏥</div>
+        </div>
+
+        {/* Stat Cards Grid */}
         <div style={styles.statsGrid}>
           <div style={styles.statCard}>
-            <div style={styles.statIcon}>👥</div>
+            <div style={{...styles.statIcon, background: 'rgba(0, 255, 255, 0.1)', color: '#00FFFF'}}>👥</div>
             <div>
               <h3 style={styles.statNumber}>{stats.total_patients}</h3>
               <p style={styles.statLabel}>Total Patients</p>
@@ -68,7 +82,7 @@ const CMDDashboard = () => {
           </div>
           
           <div style={styles.statCard}>
-            <div style={styles.statIcon}>📅</div>
+            <div style={{...styles.statIcon, background: 'rgba(46, 204, 113, 0.1)', color: '#2ecc71'}}>📅</div>
             <div>
               <h3 style={styles.statNumber}>{stats.todays_appointments}</h3>
               <p style={styles.statLabel}>Appointments Today</p>
@@ -76,7 +90,7 @@ const CMDDashboard = () => {
           </div>
           
           <div style={styles.statCard}>
-            <div style={styles.statIcon}>🧪</div>
+            <div style={{...styles.statIcon, background: 'rgba(243, 156, 18, 0.1)', color: '#f39c12'}}>🧪</div>
             <div>
               <h3 style={styles.statNumber}>{stats.pending_labs}</h3>
               <p style={styles.statLabel}>Pending Labs</p>
@@ -84,11 +98,73 @@ const CMDDashboard = () => {
           </div>
           
           <div style={styles.statCard}>
-            <div style={styles.statIcon}>💳</div>
+            <div style={{...styles.statIcon, background: 'rgba(231, 76, 60, 0.1)', color: '#e74c3c'}}>💳</div>
             <div>
               <h3 style={styles.statNumber}>${stats.unpaid_bills}</h3>
               <p style={styles.statLabel}>Unpaid Bills</p>
             </div>
+          </div>
+        </div>
+
+        <div style={styles.rowLayout}>
+          {/* Department Progress (Simulated) */}
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>Departmental Statistics</h3>
+            <div style={styles.separator}></div>
+            <div style={styles.progressItem}>
+              <div style={styles.progressHeader}><span>Reception</span><span>85%</span></div>
+              <div style={styles.progressTrack}><div style={{...styles.progressBar, width: '85%', background: '#00FFFF'}}></div></div>
+            </div>
+            <div style={styles.progressItem}>
+              <div style={styles.progressHeader}><span>Laboratory</span><span>70%</span></div>
+              <div style={styles.progressTrack}><div style={{...styles.progressBar, width: '70%', background: '#2ecc71'}}></div></div>
+            </div>
+            <div style={styles.progressItem}>
+              <div style={styles.progressHeader}><span>Pharmacy</span><span>92%</span></div>
+              <div style={styles.progressTrack}><div style={{...styles.progressBar, width: '92%', background: '#D4AF37'}}></div></div>
+            </div>
+            <div style={styles.progressItem}>
+              <div style={styles.progressHeader}><span>Maternity (ANC)</span><span>65%</span></div>
+              <div style={styles.progressTrack}><div style={{...styles.progressBar, width: '65%', background: '#e74c3c'}}></div></div>
+            </div>
+          </div>
+
+          {/* Recent Appointments Table */}
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>Recent Appointments</h3>
+            <div style={styles.separator}></div>
+            {recentAppts.length === 0 ? (
+              <p style={{color: '#8892b0', textAlign: 'center', padding: '20px'}}>No recent appointments.</p>
+            ) : (
+              <div style={styles.tableWrapper}>
+                <table style={styles.table}>
+                  <thead>
+                    <tr>
+                      <th style={styles.th}>Patient</th>
+                      <th style={styles.th}>Doctor</th>
+                      <th style={styles.th}>Date</th>
+                      <th style={styles.th}>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {recentAppts.map((a) => (
+                      <tr key={a.id}>
+                        <td style={styles.td}>{a.patient_name}</td>
+                        <td style={styles.td}>{a.doctor_name}</td>
+                        <td style={styles.td}>{new Date(a.appointment_date).toLocaleDateString()}</td>
+                        <td style={styles.td}>
+                          <span style={{
+                            ...styles.badge,
+                            backgroundColor: a.status === 'Completed' ? 'rgba(46, 204, 113, 0.1)' : 'rgba(243, 156, 18, 0.1)',
+                            color: a.status === 'Completed' ? '#2ecc71' : '#f39c12'
+                          }}>{a.status}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -133,7 +209,7 @@ const CMDDashboard = () => {
 
       <div style={styles.mainArea}>
         <div style={styles.desktopHeader}>
-          <span style={styles.pageTitle}>{view.charAt(0).toUpperCase() + view.slice(1)}</span>
+          <span style={styles.pageTitle}>{view === 'dashboard' ? 'Dashboard Overview' : view.charAt(0).toUpperCase() + view.slice(1)}</span>
         </div>
 
         <div style={styles.content}>
@@ -193,14 +269,39 @@ const styles = {
   desktopHeader: { display: window.innerWidth <= 768 ? 'none' : 'flex', height: '80px', alignItems: 'center', padding: '0 40px', backgroundColor: 'rgba(17, 34, 64, 0.5)', backdropFilter: 'blur(10px)', borderBottom: '1px solid rgba(0, 255, 255, 0.1)' },
   pageTitle: { fontSize: '24px', fontWeight: 'bold', color: '#e6f1ff', textTransform: 'capitalize' },
   content: { padding: window.innerWidth <= 768 ? '80px 15px 20px' : '40px', flex: 1 },
-  welcomeContainer: { animation: 'fadeIn 0.5s ease-in' },
-  welcomeTitle: { fontSize: '32px', margin: 0, color: '#e6f1ff' },
-  welcomeSub: { fontSize: '16px', color: '#8892b0', marginTop: '10px' },
-  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px', marginTop: '30px' },
-  statCard: { backgroundColor: 'rgba(17, 34, 64, 0.6)', padding: '25px', borderRadius: '16px', border: '1px solid rgba(0, 255, 255, 0.1)', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: '20px', transition: 'transform 0.3s ease, border 0.3s ease' },
-  statIcon: { fontSize: '32px', backgroundColor: 'rgba(0, 255, 255, 0.05)', padding: '15px', borderRadius: '12px', border: '1px solid rgba(0, 255, 255, 0.1)' },
-  statNumber: { margin: 0, fontSize: '32px', fontWeight: '800', color: '#00FFFF' },
+  
+  // Dashboard Specific Styles
+  dashboardContainer: { animation: 'fadeIn 0.5s ease-in' },
+  welcomeBanner: { 
+    background: 'linear-gradient(90deg, rgba(0, 255, 255, 0.1), rgba(17, 34, 64, 0.6))', 
+    padding: '30px', borderRadius: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+    marginBottom: '30px', border: '1px solid rgba(0, 255, 255, 0.2)', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' 
+  },
+  bannerTitle: { margin: 0, fontSize: '28px', color: '#00FFFF' },
+  bannerSub: { margin: '10px 0 0 0', color: '#8892b0' },
+  bannerIcon: { fontSize: '48px' },
+  
+  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px', marginBottom: '30px' },
+  statCard: { backgroundColor: 'rgba(17, 34, 64, 0.6)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(0, 255, 255, 0.1)', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center', gap: '15px' },
+  statIcon: { fontSize: '24px', padding: '15px', borderRadius: '12px' },
+  statNumber: { margin: 0, fontSize: '28px', fontWeight: '800', color: '#e6f1ff' },
   statLabel: { margin: '5px 0 0 0', fontSize: '14px', color: '#8892b0' },
+  
+  rowLayout: { display: 'grid', gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1.5fr', gap: '30px' },
+  card: { backgroundColor: 'rgba(17, 34, 64, 0.6)', backdropFilter: 'blur(12px)', padding: '25px', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', border: '1px solid rgba(0, 255, 255, 0.1)' },
+  cardTitle: { margin: 0, fontSize: '18px', color: '#e6f1ff' },
+  separator: { height: '2px', background: 'linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5), transparent)', margin: '15px 0', boxShadow: '0 0 10px rgba(0, 255, 255, 0.3)' },
+  
+  progressItem: { marginBottom: '15px' },
+  progressHeader: { display: 'flex', justifyContent: 'space-between', color: '#8892b0', fontSize: '14px', marginBottom: '5px' },
+  progressTrack: { height: '8px', backgroundColor: 'rgba(2, 12, 27, 0.8)', borderRadius: '10px', overflow: 'hidden' },
+  progressBar: { height: '100%', borderRadius: '10px' },
+  
+  tableWrapper: { overflowX: 'auto' },
+  table: { width: '100%', borderCollapse: 'collapse' },
+  th: { padding: '12px 10px', textAlign: 'left', color: '#D4AF37', borderBottom: '2px solid rgba(212, 175, 55, 0.3)', fontSize: '14px' },
+  td: { padding: '12px 10px', color: '#e6f1ff', fontSize: '14px', borderBottom: '1px solid rgba(0, 255, 255, 0.1)' },
+  badge: { padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }
 };
 
 export default CMDDashboard;

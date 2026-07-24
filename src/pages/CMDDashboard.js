@@ -10,6 +10,7 @@ import Billing from './Billing';
 import Appointments from './Appointments';
 import DrugChart from './DrugChart';
 import Patients from './Patients';
+import Maternity from './Maternity';
 
 const CMDDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -50,6 +51,7 @@ const CMDDashboard = () => {
     if (view === 'appointments') return <Appointments />;
     if (view === 'drugchart') return <DrugChart />;
     if (view === 'patients') return <Patients />;
+    if (view === 'maternity') return <Maternity />;
     
     return (
       <div style={styles.welcomeContainer}>
@@ -120,6 +122,7 @@ const CMDDashboard = () => {
           <button onClick={() => changeView('doctor')} style={view === 'doctor' ? styles.navActive : styles.navItem}>🩺 Doctor</button>
           <button onClick={() => changeView('nurse')} style={view === 'nurse' ? styles.navActive : styles.navItem}>💉 Nurse</button>
           <button onClick={() => changeView('drugchart')} style={view === 'drugchart' ? styles.navActive : styles.navItem}>📋 Drug Chart</button>
+          <button onClick={() => changeView('maternity')} style={view === 'maternity' ? styles.navActive : styles.navItem}>🤰 Maternity (ANC)</button>
           <button onClick={() => changeView('lab')} style={view === 'lab' ? styles.navActive : styles.navItem}>🧪 Laboratory</button>
           <button onClick={() => changeView('pharmacy')} style={view === 'pharmacy' ? styles.navActive : styles.navItem}>💊 Pharmacy</button>
           <button onClick={() => changeView('billing')} style={view === 'billing' ? styles.navActive : styles.navItem}>💳 Billing</button>

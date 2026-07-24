@@ -39,7 +39,15 @@ const CMDDashboard = () => {
         }
       }
     };
+    
+    // Fetch immediately
     fetchDashboardData();
+    
+    // Set up auto-refresh every 2 seconds (2000ms) for live updates
+    const interval = setInterval(fetchDashboardData, 2000);
+    
+    // Clean up interval when view changes
+    return () => clearInterval(interval);
   }, [user, view, API_URL]);
 
   const changeView = (newView) => {

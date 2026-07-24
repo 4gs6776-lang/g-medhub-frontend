@@ -6,29 +6,28 @@ const Maternity = () => {
   const { user } = useContext(AuthContext);
   const API_URL = process.env.REACT_APP_API_URL;
   
-  const [search, setSearch] = useState('');
-  const [results, setResults] = useState([]);
+  const [ancPatients, setAncPatients] = useState([]);
   const [selectedPatient, setSelectedPatient] = useState(null);
   
   const [history, setHistory] = useState([]);
   const today = new Date().toISOString().split('T')[0];
   const [formData, setFormData] = useState({
-    visit_date: today, gestational_age: '', 
-    temperature: '', blood_pressure: '', pulse: '', respiration: '', oxygen_saturation: '', weight: '', 
-    fetal_heart_rate: '', findings: '', next_appointment: ''
+    visit_date: today, gestational_age: '', temperature: '', blood_pressure: '', pulse: '', respiration: '', oxygen_saturation: '', weight: '', fetal_heart_rate: '', findings: '', next_appointment: ''
   });
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.get(`${API_URL}/api/patients/search?query=${search}&hospital_id=${user.hospital_id}`);
-      setResults(res.data);
-    } catch (err) { alert('Search failed'); }
-  };
+  // Auto-fetch all ANC patients when the page loads
+  useEffect(() => {
+    const fetchAncPatients = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/patients/anc?hospital_id=${user.hospital_id}`);
+        setAncPatients(res.data);
+      } catch (err) { console.error('Failed to fetch ANC patients'); }
+    };
+    fetchAncPatients();
+  }, [user, API_URL]);
 
   const selectPatient = async (patient) => {
     setSelectedPatient(patient);
-    setResults([]); setSearch('');
     try {
       const res = await axios.get(`${API_URL}/api/anc/${patient.id}`);
       setHistory(res.data);
@@ -42,15 +41,9 @@ const Maternity = () => {
   const handleSaveVisit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/api/anc`, {
-        ...formData, hospital_id: user.hospital_id, patient_id: selectedPatient.id
-      });
+      await axios.post(`${API_URL}/api/anc`, { ...formData, hospital_id: user.hospital_id, patient_id: selectedPatient.id });
       alert('ANC Visit & Vitals recorded successfully!');
-      setFormData({ 
-        visit_date: today, gestational_age: '', temperature: '', blood_pressure: '', pulse: '', 
-        respiration: '', oxygen_saturation: '', weight: '', fetal_heart_rate: '', findings: '', next_appointment: '' 
-      });
-      
+      setFormData({ visit_date: today, gestational_age: '', temperature: '', blood_pressure: '', pulse: '', respiration: '', oxygen_saturation: '', weight: '', fetal_heart_rate: '', findings: '', next_appointment: '' });
       const res = await axios.get(`${API_URL}/api/anc/${selectedPatient.id}`);
       setHistory(res.data);
     } catch (err) { alert('Failed to save ANC visit'); }
@@ -62,20 +55,24 @@ const Maternity = () => {
 
       {!selectedPatient ? (
         <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Find Patient</h3>
+          <h3 style={styles.cardTitle}>Registered ANC Patients ({ancPatients.length})</h3>
           <div style={styles.separator}></div>
-          <form onSubmit={handleSearch} style={styles.form}>
-            <input type="text" placeholder="Search Name, Phone, or ID" value={search} onChange={(e) => setSearch(e.target.value)} style={styles.input} required />
-            <button type="submit" style={styles.button}>Search</button>
-          </form>
+          <p style={{color: '#8892b0', fontSize: '14px', marginBottom: '15px'}}>Patients registered at Reception under the "ANC folder" will appear here automatically.</p>
           
-          <div style={{ marginTop: '15px' }}>
-            {results.map((p) => (
-              <div key={p.id} style={styles.resultItem} onClick={() => selectPatient(p)}>
-                <strong>GMH-{p.id}</strong> - {p.full_name} <br/>
-                <span style={{fontSize:'14px', color: '#8892b0'}}>{p.phone} | {p.gender} | {p.age}y</span>
-              </div>
-            ))}
+          <div style={styles.listContainer}>
+            {ancPatients.length === 0 ? (
+              <p style={styles.emptyText}>No ANC patients registered yet.</p>
+            ) : (
+              ancPatients.map((p) => (
+                <div key={p.id} style={styles.patientItem} onClick={() => selectPatient(p)}>
+                  <div style={styles.avatar}>{p.full_name.charAt(0)}</div>
+                  <div style={styles.patientInfo}>
+                    <h4 style={styles.patientName}>{p.full_name} <span style={styles.patientId}>(GMH-{p.id})</span></h4>
+                    <p style={styles.patientDetails}>📞 {p.phone} | 🎂 {p.age}y | 🩸 {p.blood_group}</p>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       ) : (
@@ -87,16 +84,14 @@ const Maternity = () => {
             </div>
             <div style={{display: 'flex', gap: '10px'}}>
               <button onClick={() => window.print()} style={styles.printBtn}>🖨️ Print</button>
-              <button onClick={() => setSelectedPatient(null)} style={styles.backBtn}>Close Record</button>
+              <button onClick={() => setSelectedPatient(null)} style={styles.backBtn}>Back to List</button>
             </div>
           </div>
 
-          {/* Add Visit Form */}
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>➕ Record New ANC Visit</h3>
             <div style={styles.separator}></div>
             <form onSubmit={handleSaveVisit} style={styles.form}>
-              
               <label style={styles.sectionLabel}>Standard Vitals</label>
               <div style={styles.formGrid}>
                 <div style={styles.inputGroup}><label style={styles.label}>Temp (°C)</label><input type="text" name="temperature" placeholder="36.5" value={formData.temperature} onChange={handleInputChange} style={styles.input} /></div>
@@ -120,11 +115,9 @@ const Maternity = () => {
             </form>
           </div>
 
-          {/* ANC History */}
           <div style={styles.card}>
             <h3 style={styles.cardTitle}>📋 ANC Visit History ({history.length})</h3>
             <div style={styles.separator}></div>
-            
             {history.length === 0 ? (
               <p style={{color: '#8892b0', textAlign: 'center'}}>No ANC visits recorded yet.</p>
             ) : (
@@ -134,17 +127,14 @@ const Maternity = () => {
                     <span style={styles.dateText}>📅 {new Date(visit.visit_date).toLocaleDateString()}</span>
                     {visit.next_appointment && <span style={styles.nextAppt}>Next Visit: {new Date(visit.next_appointment).toLocaleDateString()}</span>}
                   </div>
-                  
                   <div style={styles.subSection}>
                     <strong style={{color: '#00FFFF'}}>Vitals:</strong>
                     <p style={styles.historyText}>T: {visit.temperature || 'N/A'}°C | BP: {visit.blood_pressure || 'N/A'} | HR: {visit.pulse || 'N/A'}bpm | Resp: {visit.respiration || 'N/A'} | SpO2: {visit.oxygen_saturation || 'N/A'}% | Wt: {visit.weight || 'N/A'}kg</p>
                   </div>
-                  
                   <div style={styles.subSection}>
                     <strong style={{color: '#D4AF37'}}>Maternity:</strong>
                     <p style={styles.historyText}>Gestational Age: {visit.gestational_age || 'N/A'} | Fetal HR: {visit.fetal_heart_rate || 'N/A'} bpm</p>
                   </div>
-
                   {visit.findings && <p style={styles.historyText}><strong>Findings:</strong> {visit.findings}</p>}
                 </div>
               ))
@@ -163,19 +153,23 @@ const styles = {
   cardTitle: { margin: 0, fontSize: '20px', color: '#e6f1ff' },
   separator: { height: '2px', background: 'linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5), transparent)', margin: '20px 0', boxShadow: '0 0 10px rgba(0, 255, 255, 0.3)' },
   sectionLabel: { display: 'block', fontSize: '14px', color: '#D4AF37', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '1px' },
+  listContainer: { display: 'flex', flexDirection: 'column', gap: '10px' },
+  patientItem: { display: 'flex', alignItems: 'center', gap: '15px', backgroundColor: 'rgba(2, 12, 27, 0.5)', padding: '15px', borderRadius: '10px', border: '1px solid rgba(0, 255, 255, 0.05)', borderBottom: '1px solid rgba(0, 255, 255, 0.2)', cursor: 'pointer', transition: 'background 0.3s' },
+  avatar: { width: '40px', height: '40px', borderRadius: '50%', backgroundColor: 'rgba(0, 255, 255, 0.1)', color: '#00FFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 'bold', border: '1px solid rgba(0, 255, 255, 0.2)' },
+  patientInfo: { flex: 1 },
+  patientName: { margin: 0, fontSize: '16px', color: '#e6f1ff' },
+  patientId: { fontSize: '14px', color: '#00FFFF', fontWeight: 'normal' },
+  patientDetails: { margin: '5px 0 0 0', fontSize: '14px', color: '#8892b0' },
+  emptyText: { color: '#8892b0', textAlign: 'center', padding: '20px' },
   form: { display: 'flex', flexDirection: 'column', gap: '15px' },
   formGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' },
   inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px' },
   label: { fontSize: '14px', color: '#8892b0' },
   input: { width: '100%', padding: '12px', fontSize: '14px', borderRadius: '8px', border: '1px solid rgba(0, 255, 255, 0.2)', backgroundColor: 'rgba(2, 12, 27, 0.8)', color: '#e6f1ff', outline: 'none', boxSizing: 'border-box' },
-  button: { padding: '15px 30px', background: 'linear-gradient(90deg, #00FFFF, #00C6C6)', color: '#020c1b', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', boxShadow: '0 4px 15px rgba(0, 255, 255, 0.3)' },
-  saveBtn: { marginTop: '10px', padding: '15px', background: 'linear-gradient(90deg, #00FFFF, #00C6C6)', color: '#0a192f', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' },
-  resultItem: { backgroundColor: 'rgba(2, 12, 27, 0.5)', padding: '15px', borderRadius: '8px', marginBottom: '10px', border: '1px solid rgba(0, 255, 255, 0.1)', cursor: 'pointer' },
-  
+  saveBtn: { marginTop: '10px', padding: '15px', background: 'linear-gradient(90deg, #00FFFF, #00C6C6)', color: '#020c1b', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' },
   patientHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(17, 34, 64, 0.6)', padding: '20px', borderRadius: '12px', marginBottom: '20px', border: '1px solid rgba(0, 255, 255, 0.1)', flexWrap: 'wrap', gap: '10px' },
   backBtn: { padding: '10px 20px', backgroundColor: 'rgba(231, 76, 60, 0.1)', color: '#e74c3c', border: '1px solid rgba(231, 76, 60, 0.3)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
   printBtn: { padding: '10px 20px', backgroundColor: 'rgba(212, 175, 55, 0.1)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
-  
   historyItem: { backgroundColor: 'rgba(2, 12, 27, 0.5)', padding: '20px', borderRadius: '12px', marginBottom: '15px', border: '1px solid rgba(0, 255, 255, 0.1)', borderBottom: '1px solid rgba(0, 255, 255, 0.2)' },
   historyHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid rgba(0, 255, 255, 0.1)', paddingBottom: '10px' },
   dateText: { fontSize: '16px', color: '#00FFFF', fontWeight: 'bold' },

@@ -2,13 +2,19 @@ import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 
+const nigerianStates = ["Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT (Abuja)", "Gombe", "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe", "Zamfara"];
+const africanCountries = ["Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cabo Verde", "Cameroon", "Central African Republic", "Chad", "Comoros", "Congo", "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe"];
+const religions = ["Christianity", "Islam", "Traditional", "Other"];
+const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"];
+
 const Reception = () => {
   const { user } = useContext(AuthContext);
   const API_URL = process.env.REACT_APP_API_URL;
   
   const [formData, setFormData] = useState({
-    surname: '', other_names: '', phone: '', gender: 'Male', marital_status: 'Single', 
-    dob: '', age: '', address: '', state_of_origin: '', nationality: '', occupation: '', religion: '',
+    surname: '', other_names: '', phone: '', email: '', gender: 'Male', marital_status: 'Single', 
+    dob: '', age: '', blood_group: 'Unknown', address: '', state_of_origin: 'Lagos', 
+    nationality: 'Nigeria', occupation: '', religion: 'Christianity',
     next_of_kin_name: '', next_of_kin_relationship: '', next_of_kin_phone: '', next_of_kin_address: ''
   });
 
@@ -16,7 +22,21 @@ const Reception = () => {
   const [results, setResults] = useState([]);
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    // Auto-calculate Age from DOB
+    if (name === 'dob') {
+      const birthDate = new Date(value);
+      const today = new Date();
+      let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        calculatedAge--;
+      }
+      setFormData(prev => ({ ...prev, dob: value, age: calculatedAge >= 0 ? calculatedAge : '' }));
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleRegister = async (e) => {
@@ -28,12 +48,13 @@ const Reception = () => {
       });
       alert(`Patient registered! Unique Hospital Number: GMH-${res.data.id}`);
       setFormData({
-        surname: '', other_names: '', phone: '', gender: 'Male', marital_status: 'Single', 
-        dob: '', age: '', address: '', state_of_origin: '', nationality: '', occupation: '', religion: '',
+        surname: '', other_names: '', phone: '', email: '', gender: 'Male', marital_status: 'Single', 
+        dob: '', age: '', blood_group: 'Unknown', address: '', state_of_origin: 'Lagos', 
+        nationality: 'Nigeria', occupation: '', religion: 'Christianity',
         next_of_kin_name: '', next_of_kin_relationship: '', next_of_kin_phone: '', next_of_kin_address: ''
       });
     } catch (err) {
-      alert('Failed to register patient');
+      alert('Failed to register patient. Check all fields.');
     }
   };
 
@@ -61,14 +82,16 @@ const Reception = () => {
             <div style={styles.inputGroup}><label style={styles.label}>Surname</label><input type="text" name="surname" value={formData.surname} onChange={handleInputChange} style={styles.input} required /></div>
             <div style={styles.inputGroup}><label style={styles.label}>Other Names</label><input type="text" name="other_names" value={formData.other_names} onChange={handleInputChange} style={styles.input} required /></div>
             <div style={styles.inputGroup}><label style={styles.label}>Tel</label><input type="text" name="phone" value={formData.phone} onChange={handleInputChange} style={styles.input} required /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Email</label><input type="email" name="email" value={formData.email} onChange={handleInputChange} style={styles.input} /></div>
             <div style={styles.inputGroup}><label style={styles.label}>Gender</label><select name="gender" value={formData.gender} onChange={handleInputChange} style={styles.input}><option>Male</option><option>Female</option></select></div>
             <div style={styles.inputGroup}><label style={styles.label}>Marital Status</label><select name="marital_status" value={formData.marital_status} onChange={handleInputChange} style={styles.input}><option>Single</option><option>Married</option><option>Widow</option><option>Widower</option><option>Divorced</option></select></div>
             <div style={styles.inputGroup}><label style={styles.label}>Date of Birth</label><input type="date" name="dob" value={formData.dob} onChange={handleInputChange} style={styles.input} /></div>
-            <div style={styles.inputGroup}><label style={styles.label}>Age</label><input type="number" name="age" value={formData.age} onChange={handleInputChange} style={styles.input} /></div>
-            <div style={styles.inputGroup}><label style={styles.label}>Nationality</label><input type="text" name="nationality" value={formData.nationality} onChange={handleInputChange} style={styles.input} /></div>
-            <div style={styles.inputGroup}><label style={styles.label}>State of Origin</label><input type="text" name="state_of_origin" value={formData.state_of_origin} onChange={handleInputChange} style={styles.input} /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Age (Auto)</label><input type="number" name="age" value={formData.age} readOnly style={{...styles.input, backgroundColor: 'rgba(2, 12, 27, 0.4)', cursor: 'not-allowed'}} /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Blood Group</label><select name="blood_group" value={formData.blood_group} onChange={handleInputChange} style={styles.input}>{bloodGroups.map(b => <option key={b} value={b}>{b}</option>)}</select></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Nationality</label><input type="text" list="africanCountries" name="nationality" value={formData.nationality} onChange={handleInputChange} style={styles.input} /><datalist id="africanCountries">{africanCountries.map(c => <option key={c} value={c} />)}</datalist></div>
+            <div style={styles.inputGroup}><label style={styles.label}>State of Origin</label><select name="state_of_origin" value={formData.state_of_origin} onChange={handleInputChange} style={styles.input}>{nigerianStates.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
             <div style={styles.inputGroup}><label style={styles.label}>Occupation</label><input type="text" name="occupation" value={formData.occupation} onChange={handleInputChange} style={styles.input} /></div>
-            <div style={styles.inputGroup}><label style={styles.label}>Religion</label><input type="text" name="religion" value={formData.religion} onChange={handleInputChange} style={styles.input} /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Religion</label><select name="religion" value={formData.religion} onChange={handleInputChange} style={styles.input}>{religions.map(r => <option key={r} value={r}>{r}</option>)}</select></div>
             <div style={styles.inputGroup} style={{gridColumn: 'span 2'}}><label style={styles.label}>Home Address</label><input type="text" name="address" value={formData.address} onChange={handleInputChange} style={styles.input} /></div>
           </div>
 

@@ -12,6 +12,7 @@ import DrugChart from './DrugChart';
 import Patients from './Patients';
 import Maternity from './Maternity';
 import Roster from './Roster';
+import Ward from './Ward';
 
 const CMDDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -63,6 +64,7 @@ const CMDDashboard = () => {
     if (view === 'patients') return <Patients />;
     if (view === 'maternity') return <Maternity />;
     if (view === 'roster') return <Roster />;
+    if (view === 'ward') return <Ward />;
     
     return (
       <div style={styles.dashboardContainer}>
@@ -202,6 +204,7 @@ const CMDDashboard = () => {
           <button onClick={() => changeView('lab')} style={view === 'lab' ? styles.navActive : styles.navItem}>🧪 Laboratory</button>
           <button onClick={() => changeView('pharmacy')} style={view === 'pharmacy' ? styles.navActive : styles.navItem}>💊 Pharmacy</button>
           <button onClick={() => changeView('billing')} style={view === 'billing' ? styles.navActive : styles.navItem}>💳 Billing</button>
+          <button onClick={() => changeView('ward')} style={view === 'ward' ? styles.navActive : styles.navItem}>🛏️ Ward & Beds</button>
           <button onClick={() => changeView('roster')} style={view === 'roster' ? styles.navActive : styles.navItem}>🗓️ Daily Roster</button>
         </nav>
 

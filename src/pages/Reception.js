@@ -17,7 +17,6 @@ const Reception = () => {
     dob: '', age: '', blood_group: 'Unknown', address: '', state_of_origin: 'Lagos', 
     nationality: 'Nigeria', occupation: '', religion: 'Christianity', category: 'Personal folder',
     next_of_kin_name: '', next_of_kin_relationship: '', next_of_kin_phone: '', next_of_kin_address: '',
-    // ANC Fields
     special_point: '', booking_date: '', indication_for_booking: '', lmp: '', edd: '',
     husband_name: '', husband_occupation: '', employer: ''
   });
@@ -28,8 +27,8 @@ const Reception = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    // Auto-calculate Age from DOB
     if (name === 'dob') {
+      if (!value) { setFormData(prev => ({ ...prev, dob: '', age: '' })); return; }
       const birthDate = new Date(value);
       const today = new Date();
       let calculatedAge = today.getFullYear() - birthDate.getFullYear();
@@ -37,8 +36,8 @@ const Reception = () => {
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { calculatedAge--; }
       setFormData(prev => ({ ...prev, dob: value, age: calculatedAge >= 0 ? calculatedAge : '' }));
     } 
-    // Auto-calculate EDD from LMP (LMP + 280 days)
     else if (name === 'lmp') {
+      if (!value) { setFormData(prev => ({ ...prev, lmp: '', edd: '' })); return; }
       const lmpDate = new Date(value);
       const eddDate = new Date(lmpDate);
       eddDate.setDate(eddDate.getDate() + 280);
@@ -62,7 +61,7 @@ const Reception = () => {
         special_point: '', booking_date: '', indication_for_booking: '', lmp: '', edd: '',
         husband_name: '', husband_occupation: '', employer: ''
       });
-    } catch (err) { alert('Failed to register patient. Check all fields.'); }
+    } catch (err) { alert('Failed to register patient. Check console.'); }
   };
 
   const handleSearch = async (e) => {
@@ -84,9 +83,9 @@ const Reception = () => {
           
           <label style={styles.sectionLabel}>Patient Biodata</label>
           <div style={styles.formGrid}>
-            <div style={styles.inputGroup}><label style={styles.label}>Surname</label><input type="text" name="surname" value={formData.surname} onChange={handleInputChange} style={styles.input} required /></div>
-            <div style={styles.inputGroup}><label style={styles.label}>Other Names</label><input type="text" name="other_names" value={formData.other_names} onChange={handleInputChange} style={styles.input} required /></div>
-            <div style={styles.inputGroup}><label style={styles.label}>Tel</label><input type="text" name="phone" value={formData.phone} onChange={handleInputChange} style={styles.input} required /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Surname</label><input type="text" name="surname" value={formData.surname} onChange={handleInputChange} style={styles.input} /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Other Names</label><input type="text" name="other_names" value={formData.other_names} onChange={handleInputChange} style={styles.input} /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Tel</label><input type="text" name="phone" value={formData.phone} onChange={handleInputChange} style={styles.input} /></div>
             <div style={styles.inputGroup}><label style={styles.label}>Email</label><input type="email" name="email" value={formData.email} onChange={handleInputChange} style={styles.input} /></div>
             <div style={styles.inputGroup}><label style={styles.label}>Gender</label><select name="gender" value={formData.gender} onChange={handleInputChange} style={styles.input}><option>Male</option><option>Female</option></select></div>
             <div style={styles.inputGroup}><label style={styles.label}>Marital Status</label><select name="marital_status" value={formData.marital_status} onChange={handleInputChange} style={styles.input}><option>Single</option><option>Married</option><option>Widow</option><option>Widower</option><option>Divorced</option></select></div>
@@ -101,7 +100,6 @@ const Reception = () => {
             <div style={styles.inputGroup} style={{gridColumn: 'span 2'}}><label style={styles.label}>Home Address</label><input type="text" name="address" value={formData.address} onChange={handleInputChange} style={styles.input} /></div>
           </div>
 
-          {/* CONDITIONAL ANC FOLDER FORM */}
           {formData.category === 'ANC folder' && (
             <>
               <label style={{...styles.sectionLabel, marginTop: '20px'}}>🤰 ANC Specific Details</label>
@@ -124,7 +122,7 @@ const Reception = () => {
 
           <label style={{...styles.sectionLabel, marginTop: '20px'}}>Next of Kin</label>
           <div style={styles.formGrid}>
-            <div style={styles.inputGroup}><label style={styles.label}>Name</label><input type="text" name="next_of_kin_name" value={formData.next_of_kin_name} onChange={handleInputChange} style={styles.input} required /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Name</label><input type="text" name="next_of_kin_name" value={formData.next_of_kin_name} onChange={handleInputChange} style={styles.input} /></div>
             <div style={styles.inputGroup}><label style={styles.label}>Relationship</label><input type="text" name="next_of_kin_relationship" value={formData.next_of_kin_relationship} onChange={handleInputChange} style={styles.input} /></div>
             <div style={styles.inputGroup}><label style={styles.label}>Tel</label><input type="text" name="next_of_kin_phone" value={formData.next_of_kin_phone} onChange={handleInputChange} style={styles.input} /></div>
             <div style={styles.inputGroup} style={{gridColumn: 'span 2'}}><label style={styles.label}>Address</label><input type="text" name="next_of_kin_address" value={formData.next_of_kin_address} onChange={handleInputChange} style={styles.input} /></div>
@@ -138,7 +136,7 @@ const Reception = () => {
         <h3 style={styles.cardTitle}>Patient Search</h3>
         <div style={styles.separator}></div>
         <form onSubmit={handleSearch} style={styles.form}>
-          <input type="text" placeholder="Search by Name, Phone, or ID" value={search} onChange={(e) => setSearch(e.target.value)} style={styles.input} required />
+          <input type="text" placeholder="Search by Name, Phone, or ID" value={search} onChange={(e) => setSearch(e.target.value)} style={styles.input} />
           <button type="submit" style={styles.searchBtn}>Search</button>
         </form>
         <div style={{ marginTop: '15px' }}>

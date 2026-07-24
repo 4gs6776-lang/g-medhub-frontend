@@ -11,11 +11,13 @@ const DrugChart = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   
   const [chartData, setChartData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [editingId, setEditingId] = useState(null);
   
   const today = new Date().toISOString().split('T')[0];
   const [formData, setFormData] = useState({
-    entry_date: today, entry_time: '', medication: '', dosage: '', next_dose_time: '', route: 'Oral', frequency: 'Stat', sign: user?.full_name || 'Nurse'
+    entry_date: today, entry_time: '', drug_name: '', dosage: '', route: 'Oral', 
+    frequency: 'Stat', duration: '', prescribing_doctor: '', administering_nurse: user?.full_name || '', 
+    status: 'Pending', remarks: ''
   });
 
   const handleSearch = async (e) => {
@@ -29,41 +31,85 @@ const DrugChart = () => {
   const selectPatient = async (patient) => {
     setSelectedPatient(patient);
     setResults([]); setSearch('');
+    fetchChart(patient.id);
+  };
+
+  const fetchChart = async (patientId) => {
     try {
-      const res = await axios.get(`${API_URL}/api/drugchart/${patient.id}`);
+      const res = await axios.get(`${API_URL}/api/drugchart/${patientId}`);
       setChartData(res.data);
-      const lastPage = Math.ceil((res.data.length + 1) / 10);
-      setCurrentPage(lastPage === 0 ? 1 : lastPage);
     } catch (err) { console.error('Failed to load chart'); }
   };
 
-  const handleAddEntry = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post(`${API_URL}/api/drugchart`, {
-        ...formData, hospital_id: user.hospital_id, patient_id: selectedPatient.id, nurse_id: user.id
-      });
-      const newChartData = [...chartData, res.data];
-      setChartData(newChartData);
-      const newLastPage = Math.ceil((newChartData.length + 1) / 10);
-      setCurrentPage(newLastPage);
-      setFormData({ ...formData, entry_time: '', medication: '', dosage: '', next_dose_time: '' });
-    } catch (err) { alert('Failed to add entry'); }
+  const handleInputChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const startIndex = (currentPage - 1) * 10;
-  const currentEntries = chartData.slice(startIndex, startIndex + 10);
-  const totalPages = Math.ceil((chartData.length + 1) / 10);
-  const emptyRowsNeeded = 10 - currentEntries.length;
-  const emptyRows = Array.from({ length: emptyRowsNeeded });
+  const resetForm = () => {
+    setEditingId(null);
+    setFormData({
+      entry_date: today, entry_time: '', drug_name: '', dosage: '', route: 'Oral', 
+      frequency: 'Stat', duration: '', prescribing_doctor: '', administering_nurse: user?.full_name || '', 
+      status: 'Pending', remarks: ''
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (editingId) {
+        // Update existing record
+        await axios.put(`${API_URL}/api/drugchart/${editingId}`, formData);
+        alert('Record updated successfully!');
+      } else {
+        // Add new record
+        await axios.post(`${API_URL}/api/drugchart`, {
+          ...formData, hospital_id: user.hospital_id, patient_id: selectedPatient.id
+        });
+        alert('Drug record added!');
+      }
+      resetForm();
+      fetchChart(selectedPatient.id);
+    } catch (err) { alert('Failed to save record'); }
+  };
+
+  const handleEdit = (entry) => {
+    setEditingId(entry.id);
+    setFormData({
+      entry_date: entry.entry_date || today, entry_time: entry.entry_time || '', drug_name: entry.drug_name || '', 
+      dosage: entry.dosage || '', route: entry.route || 'Oral', frequency: entry.frequency || 'Stat', 
+      duration: entry.duration || '', prescribing_doctor: entry.prescribing_doctor || '', 
+      administering_nurse: entry.administering_nurse || '', status: entry.status || 'Pending', remarks: entry.remarks || ''
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this drug record?')) {
+      try {
+        await axios.delete(`${API_URL}/api/drugchart/${id}`);
+        alert('Record deleted.');
+        fetchChart(selectedPatient.id);
+      } catch (err) { alert('Failed to delete'); }
+    }
+  };
+
+  const getStatusStyle = (status) => {
+    switch(status) {
+      case 'Given': return { color: '#2ecc71', border: '1px solid rgba(46, 204, 113, 0.3)', bg: 'rgba(46, 204, 113, 0.1)' };
+      case 'Missed': return { color: '#e74c3c', border: '1px solid rgba(231, 76, 60, 0.3)', bg: 'rgba(231, 76, 60, 0.1)' };
+      case 'Discontinued': return { color: '#95a5a6', border: '1px solid rgba(149, 165, 166, 0.3)', bg: 'rgba(149, 165, 166, 0.1)' };
+      default: return { color: '#f39c12', border: '1px solid rgba(243, 156, 18, 0.3)', bg: 'rgba(243, 156, 18, 0.1)' }; // Pending
+    }
+  };
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>💉 Drug Administration Chart</h2>
+      <h2 style={styles.title}>💉 Drug Administration Chart (EMR)</h2>
 
       {!selectedPatient ? (
         <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Find Patient for Drug Chart</h3>
+          <h3 style={styles.cardTitle}>Find Patient Record</h3>
           <div style={styles.separator}></div>
           <form onSubmit={handleSearch} style={styles.form}>
             <input type="text" placeholder="Search Name, Phone, or ID" value={search} onChange={(e) => setSearch(e.target.value)} style={styles.input} required />
@@ -82,67 +128,76 @@ const DrugChart = () => {
         <>
           <div style={styles.patientHeader}>
             <div>
-              <h3 style={{margin:0, color: '#00FFFF'}}>{selectedPatient.full_name}</h3>
-              <p style={{margin:'5px 0 0 0', fontSize:'14px', color: '#8892b0'}}>ID: GMH-{selectedPatient.id}</p>
+              <h3 style={{margin:0, color: '#00FFFF'}}>{selectedPatient.full_name} <span style={{fontSize:'14px', color:'#8892b0'}}>(GMH-{selectedPatient.id})</span></h3>
+              <p style={{margin:'5px 0 0 0', fontSize:'14px', color: '#8892b0'}}>Permanent Drug Administration Record</p>
             </div>
-            <div style={{display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap'}}>
-              <div style={styles.pageNav}>
-                <button onClick={() => setCurrentPage(p => Math.max(1, p-1))} disabled={currentPage === 1} style={styles.navBtn}>← Prev</button>
-                <span style={{color: '#D4AF37', fontWeight: 'bold'}}>Page {currentPage} of {totalPages}</span>
-                <button onClick={() => setCurrentPage(p => Math.min(totalPages, p+1))} disabled={currentPage === totalPages} style={styles.navBtn}>Next →</button>
+            <div style={{display: 'flex', gap: '10px'}}>
+              <button onClick={() => window.print()} style={styles.printBtn}>🖨️ Print</button>
+              <button onClick={() => { setSelectedPatient(null); resetForm(); }} style={styles.backBtn}>Close Record</button>
+            </div>
+          </div>
+
+          {/* Add/Edit Form */}
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>{editingId ? '✏️ Edit Drug Record' : '➕ Add New Medication'}</h3>
+            <div style={styles.separator}></div>
+            <form onSubmit={handleSubmit} style={styles.form}>
+              <div style={styles.formGrid}>
+                <div style={styles.inputGroup}><label style={styles.label}>Date</label><input type="date" name="entry_date" value={formData.entry_date} onChange={handleInputChange} style={styles.input} required /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Time</label><input type="time" name="entry_time" value={formData.entry_time} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Drug Name</label><input type="text" name="drug_name" value={formData.drug_name} onChange={handleInputChange} style={styles.input} required /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Dosage/Strength</label><input type="text" name="dosage" value={formData.dosage} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Route</label><select name="route" value={formData.route} onChange={handleInputChange} style={styles.input}><option>Oral</option><option>IV</option><option>IM</option><option>SC</option><option>Topical</option></select></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Frequency</label><select name="frequency" value={formData.frequency} onChange={handleInputChange} style={styles.input}><option>Stat</option><option>OD</option><option>BD</option><option>TDS</option><option>QDS</option><option>PRN</option></select></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Duration</label><input type="text" name="duration" placeholder="e.g. 5 days" value={formData.duration} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Prescribing Doctor</label><input type="text" name="prescribing_doctor" value={formData.prescribing_doctor} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Administering Nurse</label><input type="text" name="administering_nurse" value={formData.administering_nurse} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Status</label><select name="status" value={formData.status} onChange={handleInputChange} style={styles.input}><option>Pending</option><option>Given</option><option>Missed</option><option>Discontinued</option></select></div>
               </div>
-              <button onClick={() => setSelectedPatient(null)} style={styles.backBtn}>Change Patient</button>
-            </div>
+              <div style={styles.inputGroup}><label style={styles.label}>Remarks/Notes</label><textarea name="remarks" value={formData.remarks} onChange={handleInputChange} style={{...styles.input, minHeight: '60px'}} /></div>
+              
+              <div style={{display: 'flex', gap: '10px'}}>
+                <button type="submit" style={styles.saveBtn}>{editingId ? 'Update Record' : 'Save to Chart'}</button>
+                {editingId && <button type="button" onClick={resetForm} style={styles.cancelBtn}>Cancel Edit</button>}
+              </div>
+            </form>
           </div>
 
-          <div style={styles.tableWrapper}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>Date</th><th style={styles.th}>Time</th><th style={styles.th}>Medication</th>
-                  <th style={styles.th}>Dosage</th><th style={styles.th}>Next Dose</th><th style={styles.th}>Route</th>
-                  <th style={styles.th}>Frequency</th><th style={styles.th}>Sign</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentEntries.map((entry) => (
-                  <tr key={entry.id} style={styles.row}>
-                    <td style={styles.td}>{entry.entry_date}</td><td style={styles.td}>{entry.entry_time}</td>
-                    <td style={styles.tdHighlight}>{entry.medication}</td><td style={styles.td}>{entry.dosage}</td>
-                    <td style={styles.td}>{entry.next_dose_time}</td><td style={styles.td}>{entry.route}</td>
-                    <td style={styles.td}>{entry.frequency}</td><td style={styles.tdSign}>{entry.sign}</td>
-                  </tr>
-                ))}
-                
-                {emptyRows.length > 0 && (
-                  <tr style={{...styles.row, backgroundColor: 'rgba(0, 255, 255, 0.05)'}}>
-                    <td style={styles.td}><input type="date" value={formData.entry_date} onChange={(e) => setFormData({...formData, entry_date: e.target.value})} style={styles.tableInput} /></td>
-                    <td style={styles.td}><input type="time" value={formData.entry_time} onChange={(e) => setFormData({...formData, entry_time: e.target.value})} style={styles.tableInput} /></td>
-                    <td style={styles.td}><input type="text" placeholder="Drug Name" value={formData.medication} onChange={(e) => setFormData({...formData, medication: e.target.value})} style={styles.tableInput} /></td>
-                    <td style={styles.td}><input type="text" placeholder="e.g. 500mg" value={formData.dosage} onChange={(e) => setFormData({...formData, dosage: e.target.value})} style={styles.tableInput} /></td>
-                    <td style={styles.td}><input type="time" value={formData.next_dose_time} onChange={(e) => setFormData({...formData, next_dose_time: e.target.value})} style={styles.tableInput} /></td>
-                    <td style={styles.td}><select value={formData.route} onChange={(e) => setFormData({...formData, route: e.target.value})} style={styles.tableInput}><option>Oral</option><option>IV</option><option>IM</option><option>Subcut</option><option>Topical</option></select></td>
-                    <td style={styles.td}><select value={formData.frequency} onChange={(e) => setFormData({...formData, frequency: e.target.value})} style={styles.tableInput}><option>Stat</option><option>OD</option><option>BD</option><option>TDS</option><option>QDS</option><option>PRN</option></select></td>
-                    <td style={styles.td}><input type="text" value={formData.sign} onChange={(e) => setFormData({...formData, sign: e.target.value})} style={styles.tableInput} /></td>
-                  </tr>
-                )}
-                
-                {emptyRows.slice(1).map((_, index) => (
-                  <tr key={`empty-${index}`} style={styles.row}>
-                    <td style={styles.tdEmpty}></td><td style={styles.tdEmpty}></td><td style={styles.tdEmpty}></td>
-                    <td style={styles.tdEmpty}></td><td style={styles.tdEmpty}></td><td style={styles.tdEmpty}></td>
-                    <td style={styles.tdEmpty}></td><td style={styles.tdEmpty}></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          {/* History List */}
+          <div style={styles.card}>
+            <h3 style={styles.cardTitle}>📋 Medication History ({chartData.length})</h3>
+            <div style={styles.separator}></div>
+            
+            {chartData.length === 0 ? (
+              <p style={{color: '#8892b0', textAlign: 'center'}}>No medication records yet.</p>
+            ) : (
+              chartData.map((entry) => {
+                const st = getStatusStyle(entry.status);
+                return (
+                  <div key={entry.id} style={styles.historyItem}>
+                    <div style={styles.historyHeader}>
+                      <span style={styles.drugName}>{entry.drug_name} <span style={{color:'#8892b0', fontSize:'14px', fontWeight:'normal'}}>({entry.dosage})</span></span>
+                      <span style={{...styles.badge, color: st.color, border: st.border, backgroundColor: st.bg}}>{entry.status}</span>
+                    </div>
+                    <div style={styles.historyGrid}>
+                      <p style={styles.historyText}><strong>📅 Date/Time:</strong> {entry.entry_date} at {entry.entry_time || 'N/A'}</p>
+                      <p style={styles.historyText}><strong>🔄 Route:</strong> {entry.route}</p>
+                      <p style={styles.historyText}><strong>⏱️ Frequency:</strong> {entry.frequency}</p>
+                      <p style={styles.historyText}><strong>⏳ Duration:</strong> {entry.duration || 'N/A'}</p>
+                      <p style={styles.historyText}><strong>🩺 Doctor:</strong> {entry.prescribing_doctor || 'N/A'}</p>
+                      <p style={styles.historyText}><strong>💉 Nurse:</strong> {entry.administering_nurse || 'N/A'}</p>
+                    </div>
+                    {entry.remarks && <p style={styles.historyText}><strong>📝 Remarks:</strong> {entry.remarks}</p>}
+                    
+                    <div style={styles.actionBtns}>
+                      <button onClick={() => handleEdit(entry)} style={styles.editBtn}>✏️ Edit</button>
+                      <button onClick={() => handleDelete(entry.id)} style={styles.deleteBtn}>🗑️ Delete</button>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
-
-          {emptyRows.length > 0 ? (
-            <button onClick={handleAddEntry} style={styles.saveBtn}>💾 Sign & Save Entry</button>
-          ) : (
-            <p style={{textAlign: 'center', color: '#D4AF37', marginTop: '15px'}}>Page is full! Click "Next →" to start Page {currentPage + 1}.</p>
-          )}
         </>
       )}
     </div>
@@ -150,29 +205,35 @@ const DrugChart = () => {
 };
 
 const styles = {
-  container: { maxWidth: '1200px', margin: '0 auto', fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif", color: '#e6f1ff', animation: 'fadeIn 0.5s ease-in' },
+  container: { maxWidth: '1000px', margin: '0 auto', fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif", color: '#e6f1ff', animation: 'fadeIn 0.5s ease-in' },
   title: { fontSize: '24px', margin: '0 0 20px 0', color: '#e6f1ff' },
-  card: { backgroundColor: 'rgba(17, 34, 64, 0.6)', backdropFilter: 'blur(12px)', padding: '30px', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', border: '1px solid rgba(0, 255, 255, 0.1)' },
+  card: { backgroundColor: 'rgba(17, 34, 64, 0.6)', backdropFilter: 'blur(12px)', padding: '30px', borderRadius: '16px', marginBottom: '30px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', border: '1px solid rgba(0, 255, 255, 0.1)' },
   cardTitle: { margin: 0, fontSize: '20px', color: '#e6f1ff' },
   separator: { height: '2px', background: 'linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.5), transparent)', margin: '20px 0', boxShadow: '0 0 10px rgba(0, 255, 255, 0.3)' },
-  form: { display: 'flex', gap: '15px', flexWrap: 'wrap' },
-  input: { flex: 1, minWidth: '200px', padding: '15px', fontSize: '16px', borderRadius: '8px', border: '1px solid rgba(0, 255, 255, 0.2)', backgroundColor: 'rgba(2, 12, 27, 0.8)', color: '#e6f1ff', outline: 'none' },
+  form: { display: 'flex', flexDirection: 'column', gap: '15px' },
+  formGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '15px' },
+  inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px' },
+  label: { fontSize: '14px', color: '#8892b0' },
+  input: { width: '100%', padding: '12px', fontSize: '14px', borderRadius: '8px', border: '1px solid rgba(0, 255, 255, 0.2)', backgroundColor: 'rgba(2, 12, 27, 0.8)', color: '#e6f1ff', outline: 'none', boxSizing: 'border-box' },
   button: { padding: '15px 30px', background: 'linear-gradient(90deg, #00FFFF, #00C6C6)', color: '#020c1b', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', boxShadow: '0 4px 15px rgba(0, 255, 255, 0.3)' },
+  saveBtn: { marginTop: '10px', padding: '15px', flex: 1, background: 'linear-gradient(90deg, #00FFFF, #00C6C6)', color: '#020c1b', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' },
+  cancelBtn: { marginTop: '10px', padding: '15px', flex: 1, background: 'rgba(231, 76, 60, 0.1)', color: '#e74c3c', border: '1px solid rgba(231, 76, 60, 0.3)', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' },
   resultItem: { backgroundColor: 'rgba(2, 12, 27, 0.5)', padding: '15px', borderRadius: '8px', marginBottom: '10px', border: '1px solid rgba(0, 255, 255, 0.1)', cursor: 'pointer' },
+  
   patientHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'rgba(17, 34, 64, 0.6)', padding: '20px', borderRadius: '12px', marginBottom: '20px', border: '1px solid rgba(0, 255, 255, 0.1)', flexWrap: 'wrap', gap: '10px' },
   backBtn: { padding: '10px 20px', backgroundColor: 'rgba(231, 76, 60, 0.1)', color: '#e74c3c', border: '1px solid rgba(231, 76, 60, 0.3)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
-  pageNav: { display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px' },
-  navBtn: { padding: '5px 10px', backgroundColor: 'rgba(212, 175, 55, 0.1)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '6px', cursor: 'pointer' },
-  tableWrapper: { overflowX: 'auto', backgroundColor: 'rgba(17, 34, 64, 0.6)', borderRadius: '12px', border: '1px solid rgba(0, 255, 255, 0.1)' },
-  table: { width: '100%', borderCollapse: 'collapse', minWidth: '900px' },
-  th: { padding: '15px 10px', textAlign: 'left', color: '#D4AF37', borderBottom: '2px solid rgba(212, 175, 55, 0.3)', fontSize: '14px', textTransform: 'uppercase', letterSpacing: '1px' },
-  row: { borderBottom: '1px solid rgba(0, 255, 255, 0.1)' },
-  td: { padding: '12px 10px', color: '#e6f1ff', fontSize: '14px' },
-  tdHighlight: { padding: '12px 10px', color: '#00FFFF', fontSize: '14px', fontWeight: 'bold' },
-  tdSign: { padding: '12px 10px', color: '#D4AF37', fontSize: '14px', fontStyle: 'italic' },
-  tdEmpty: { padding: '18px 10px', borderBottom: '1px dashed rgba(0, 255, 255, 0.1)' },
-  tableInput: { width: '100%', padding: '8px', backgroundColor: 'rgba(2, 12, 27, 0.8)', border: '1px solid rgba(0, 255, 255, 0.3)', borderRadius: '4px', color: '#e6f1ff', boxSizing: 'border-box', fontSize: '14px' },
-  saveBtn: { marginTop: '20px', width: '100%', padding: '15px', background: 'linear-gradient(90deg, #D4AF37, #F4D03F)', color: '#020c1b', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', boxShadow: '0 4px 15px rgba(212, 175, 55, 0.3)' }
+  printBtn: { padding: '10px 20px', backgroundColor: 'rgba(212, 175, 55, 0.1)', color: '#D4AF37', border: '1px solid rgba(212, 175, 55, 0.3)', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
+  
+  // History Styles
+  historyItem: { backgroundColor: 'rgba(2, 12, 27, 0.5)', padding: '20px', borderRadius: '12px', marginBottom: '15px', border: '1px solid rgba(0, 255, 255, 0.1)', borderBottom: '1px solid rgba(0, 255, 255, 0.2)' },
+  historyHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid rgba(0, 255, 255, 0.1)', paddingBottom: '10px' },
+  drugName: { fontSize: '18px', color: '#00FFFF', fontWeight: 'bold' },
+  badge: { padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' },
+  historyGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '10px', marginBottom: '10px' },
+  historyText: { margin: 0, fontSize: '14px', color: '#e6f1ff' },
+  actionBtns: { display: 'flex', gap: '10px', marginTop: '10px', justifyContent: 'flex-end' },
+  editBtn: { padding: '8px 16px', backgroundColor: 'rgba(0, 255, 255, 0.1)', color: '#00FFFF', border: '1px solid rgba(0, 255, 255, 0.3)', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' },
+  deleteBtn: { padding: '8px 16px', backgroundColor: 'rgba(231, 76, 60, 0.1)', color: '#e74c3c', border: '1px solid rgba(231, 76, 60, 0.3)', borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 'bold' }
 };
 
 export default DrugChart;

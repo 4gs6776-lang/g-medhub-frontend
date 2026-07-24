@@ -5,6 +5,7 @@ import Doctor from './Doctor';
 import Lab from './Lab';
 import Pharmacy from './Pharmacy';
 import Nurse from './Nurse';
+import Billing from './Billing';
 
 const CMDDashboard = () => {
   const { user, logout } = useContext(AuthContext);
@@ -16,6 +17,7 @@ const CMDDashboard = () => {
     if (view === 'lab') return <Lab />;
     if (view === 'pharmacy') return <Pharmacy />;
     if (view === 'nurse') return <Nurse />;
+    if (view === 'billing') return <Billing />;
     
     return (
       <div>
@@ -49,6 +51,7 @@ const CMDDashboard = () => {
           <button onClick={() => setView('nurse')} style={view === 'nurse' ? styles.navActive : styles.navItem}>Nurse</button>
           <button onClick={() => setView('lab')} style={view === 'lab' ? styles.navActive : styles.navItem}>Laboratory</button>
           <button onClick={() => setView('pharmacy')} style={view === 'pharmacy' ? styles.navActive : styles.navItem}>Pharmacy</button>
+          <button onClick={() => setView('billing')} style={view === 'billing' ? styles.navActive : styles.navItem}>Billing/Cashier</button>
         </nav>
       </div>
 

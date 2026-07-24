@@ -16,7 +16,10 @@ const Reception = () => {
     surname: '', other_names: '', phone: '', email: '', gender: 'Male', marital_status: 'Single', 
     dob: '', age: '', blood_group: 'Unknown', address: '', state_of_origin: 'Lagos', 
     nationality: 'Nigeria', occupation: '', religion: 'Christianity', category: 'Personal folder',
-    next_of_kin_name: '', next_of_kin_relationship: '', next_of_kin_phone: '', next_of_kin_address: ''
+    next_of_kin_name: '', next_of_kin_relationship: '', next_of_kin_phone: '', next_of_kin_address: '',
+    // ANC Fields
+    special_point: '', booking_date: '', indication_for_booking: '', lmp: '', edd: '',
+    husband_name: '', husband_occupation: '', employer: ''
   });
 
   const [search, setSearch] = useState('');
@@ -24,6 +27,8 @@ const Reception = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // Auto-calculate Age from DOB
     if (name === 'dob') {
       const birthDate = new Date(value);
       const today = new Date();
@@ -31,7 +36,15 @@ const Reception = () => {
       const m = today.getMonth() - birthDate.getMonth();
       if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { calculatedAge--; }
       setFormData(prev => ({ ...prev, dob: value, age: calculatedAge >= 0 ? calculatedAge : '' }));
-    } else {
+    } 
+    // Auto-calculate EDD from LMP (LMP + 280 days)
+    else if (name === 'lmp') {
+      const lmpDate = new Date(value);
+      const eddDate = new Date(lmpDate);
+      eddDate.setDate(eddDate.getDate() + 280);
+      setFormData(prev => ({ ...prev, lmp: value, edd: eddDate.toISOString().split('T')[0] }));
+    } 
+    else {
       setFormData({ ...formData, [name]: value });
     }
   };
@@ -45,7 +58,9 @@ const Reception = () => {
         surname: '', other_names: '', phone: '', email: '', gender: 'Male', marital_status: 'Single', 
         dob: '', age: '', blood_group: 'Unknown', address: '', state_of_origin: 'Lagos', 
         nationality: 'Nigeria', occupation: '', religion: 'Christianity', category: 'Personal folder',
-        next_of_kin_name: '', next_of_kin_relationship: '', next_of_kin_phone: '', next_of_kin_address: ''
+        next_of_kin_name: '', next_of_kin_relationship: '', next_of_kin_phone: '', next_of_kin_address: '',
+        special_point: '', booking_date: '', indication_for_booking: '', lmp: '', edd: '',
+        husband_name: '', husband_occupation: '', employer: ''
       });
     } catch (err) { alert('Failed to register patient. Check all fields.'); }
   };
@@ -85,6 +100,27 @@ const Reception = () => {
             <div style={styles.inputGroup}><label style={styles.label}>Category (Folder)</label><select name="category" value={formData.category} onChange={handleInputChange} style={styles.input}>{categories.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
             <div style={styles.inputGroup} style={{gridColumn: 'span 2'}}><label style={styles.label}>Home Address</label><input type="text" name="address" value={formData.address} onChange={handleInputChange} style={styles.input} /></div>
           </div>
+
+          {/* CONDITIONAL ANC FOLDER FORM */}
+          {formData.category === 'ANC folder' && (
+            <>
+              <label style={{...styles.sectionLabel, marginTop: '20px'}}>🤰 ANC Specific Details</label>
+              <div style={styles.formGrid}>
+                <div style={styles.inputGroup}><label style={styles.label}>Special Point</label><input type="text" name="special_point" placeholder="e.g., First pregnancy" value={formData.special_point} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Date of Booking</label><input type="date" name="booking_date" value={formData.booking_date} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup} style={{gridColumn: 'span 2'}}><label style={styles.label}>Indication for Booking</label><input type="text" name="indication_for_booking" placeholder="e.g., Routine ANC" value={formData.indication_for_booking} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Last Menstruation Period (L.M.P)</label><input type="date" name="lmp" value={formData.lmp} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Est. Date of Delivery (E.D.D) - Auto</label><input type="date" name="edd" value={formData.edd} readOnly style={{...styles.input, backgroundColor: 'rgba(2, 12, 27, 0.4)', cursor: 'not-allowed'}} /></div>
+              </div>
+
+              <label style={{...styles.sectionLabel, marginTop: '20px'}}>Husband Details</label>
+              <div style={styles.formGrid}>
+                <div style={styles.inputGroup}><label style={styles.label}>Husband's Name</label><input type="text" name="husband_name" value={formData.husband_name} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup}><label style={styles.label}>Husband's Occupation</label><input type="text" name="husband_occupation" value={formData.husband_occupation} onChange={handleInputChange} style={styles.input} /></div>
+                <div style={styles.inputGroup} style={{gridColumn: 'span 2'}}><label style={styles.label}>Employer</label><input type="text" name="employer" value={formData.employer} onChange={handleInputChange} style={styles.input} /></div>
+              </div>
+            </>
+          )}
 
           <label style={{...styles.sectionLabel, marginTop: '20px'}}>Next of Kin</label>
           <div style={styles.formGrid}>

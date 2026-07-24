@@ -4,12 +4,33 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <title>G-MedHub</title>
-    <style>
+      <style>
       html, body {
         margin: 0;
         padding: 0;
-        background-color: #0a192f;
+        background-color: #020c1b;
         overflow-x: hidden;
+      }
+      
+      /* Premium fade-in animation */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      
+      /* Custom scrollbar for desktop */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #020c1b;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(0, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 255, 255, 0.4);
       }
     </style>
   </head>

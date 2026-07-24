@@ -1,4 +1,5 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
 import Reception from './Reception';
 import Doctor from './Doctor';
@@ -11,6 +12,26 @@ import Appointments from './Appointments';
 const CMDDashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const [view, setView] = useState('dashboard');
+  const [stats, setStats] = useState({
+    total_patients: 0,
+    todays_appointments: 0,
+    pending_labs: 0,
+    unpaid_bills: 0
+  });
+  const API_URL = process.env.REACT_APP_API_URL;
+
+  // Fetch live statistics when the dashboard loads
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/stats?hospital_id=${user.hospital_id}`);
+        setStats(res.data);
+      } catch (err) {
+        console.error('Failed to fetch stats');
+      }
+    };
+    fetchStats();
+  }, [user, view]); // Refresh stats when view changes back to dashboard
 
   const renderContent = () => {
     if (view === 'reception') return <Reception />;
@@ -21,19 +42,28 @@ const CMDDashboard = () => {
     if (view === 'billing') return <Billing />;
     if (view === 'appointments') return <Appointments />;
     
+    // Default Dashboard View with Live Stats
     return (
       <div>
         <h2>Hospital Overview</h2>
-        <p style={{ color: '#8892b0' }}>Welcome back, {user?.full_name}!</p>
+        <p style={{ color: '#8892b0' }}>Welcome back, {user?.full_name}! Here is what's happening at Hallel Hospital today.</p>
         
         <div style={styles.statsGrid}>
           <div style={styles.statCard}>
-            <h3 style={{color: '#00FFFF', margin: 0}}>0</h3>
-            <p style={{color: '#8892b0', margin: '5px 0 0 0'}}>Total Patients</p>
+            <h3 style={styles.statNumber}>{stats.total_patients}</h3>
+            <p style={styles.statLabel}>Total Patients</p>
           </div>
           <div style={styles.statCard}>
-            <h3 style={{color: '#00FFFF', margin: 0}}>0</h3>
-            <p style={{color: '#8892b0', margin: '5px 0 0 0'}}>Lab Tests Today</p>
+            <h3 style={styles.statNumber}>{stats.todays_appointments}</h3>
+            <p style={styles.statLabel}>Today's Appointments</p>
+          </div>
+          <div style={styles.statCard}>
+            <h3 style={styles.statNumber}>{stats.pending_labs}</h3>
+            <p style={styles.statLabel}>Pending Lab Tests</p>
+          </div>
+          <div style={styles.statCard}>
+            <h3 style={styles.statNumber}>${stats.unpaid_bills}</h3>
+            <p style={styles.statLabel}>Unpaid Bills</p>
           </div>
         </div>
       </div>
@@ -84,8 +114,12 @@ const styles = {
   header: { height: '60px', backgroundColor: '#112240', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 20px', borderBottom: '1px solid #233554' },
   logoutBtn: { padding: '8px 16px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer' },
   content: { padding: '20px', flex: 1 },
-  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px', marginTop: '20px' },
-  statCard: { backgroundColor: '#112240', padding: '20px', borderRadius: '8px', border: '1px solid #233554' }
+  
+  // Stats Cards Styling
+  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px', marginTop: '20px' },
+  statCard: { backgroundColor: '#112240', padding: '20px', borderRadius: '8px', border: '1px solid #233554', boxShadow: '0 4px 6px rgba(0,0,0,0.3)' },
+  statNumber: { color: '#00FFFF', margin: 0, fontSize: '32px', fontWeight: 'bold' },
+  statLabel: { color: '#8892b0', margin: '5px 0 0 0', fontSize: '14px' }
 };
 
 export default CMDDashboard;

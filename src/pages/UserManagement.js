@@ -34,6 +34,7 @@ const UserManagement = () => {
       setFormData({ full_name: '', email: '', password: '', role: 'Doctor' });
       fetchStaff();
     } catch (err) {
+      // Show the EXACT error message from the backend
       alert(err.response?.data?.message || 'Failed to create staff account.');
     }
   };
@@ -57,9 +58,9 @@ const UserManagement = () => {
         <div style={styles.separator}></div>
         <form onSubmit={handleAddStaff} style={styles.form}>
           <div style={styles.formGrid}>
-            <div style={styles.inputGroup}><label style={styles.label}>Full Name</label><input type="text" name="full_name" placeholder="e.g., Dr. John Doe" value={formData.full_name} onChange={handleInputChange} style={styles.input} required /></div>
-            <div style={styles.inputGroup}><label style={styles.label}>Email Address</label><input type="email" name="email" placeholder="e.g., john@hallel.com" value={formData.email} onChange={handleInputChange} style={styles.input} required /></div>
-            <div style={styles.inputGroup}><label style={styles.label}>Temporary Password</label><input type="text" name="password" placeholder="Min 6 characters" value={formData.password} onChange={handleInputChange} style={styles.input} required /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Full Name</label><input type="text" name="full_name" placeholder="e.g., Dr. John Doe" value={formData.full_name} onChange={handleInputChange} style={styles.input} /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Email Address</label><input type="email" name="email" placeholder="e.g., john@hallel.com" value={formData.email} onChange={handleInputChange} style={styles.input} /></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Password (Any text)</label><input type="text" name="password" placeholder="e.g., 1234" value={formData.password} onChange={handleInputChange} style={styles.input} /></div>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Role / Department</label>
               <select name="role" value={formData.role} onChange={handleInputChange} style={styles.input}>
@@ -88,9 +89,9 @@ const UserManagement = () => {
             const rc = getRoleColor(s.role);
             return (
               <div key={s.id} style={styles.staffItem}>
-                <div style={styles.avatar}>{s.full_name.charAt(0)}</div>
+                <div style={styles.avatar}>{s.full_name ? s.full_name.charAt(0) : 'S'}</div>
                 <div style={styles.staffDetails}>
-                  <h4 style={styles.staffName}>{s.full_name} {s.id === user.id && <span style={{fontSize: '12px', color: '#D4AF37'}}>(You)</span>}</h4>
+                  <h4 style={styles.staffName}>{s.full_name || 'Unknown'} {s.id === user.id && <span style={{fontSize: '12px', color: '#D4AF37'}}>(You)</span>}</h4>
                   <p style={styles.staffEmail}>✉️ {s.email}</p>
                 </div>
                 <span style={{...styles.badge, color: rc.color, backgroundColor: rc.bg, border: rc.border}}>{s.role}</span>

@@ -6,6 +6,7 @@ const nigerianStates = ["Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Ba
 const africanCountries = ["Algeria", "Angola", "Benin", "Botswana", "Burkina Faso", "Burundi", "Cabo Verde", "Cameroon", "Central African Republic", "Chad", "Comoros", "Congo", "Djibouti", "Egypt", "Equatorial Guinea", "Eritrea", "Eswatini", "Ethiopia", "Gabon", "Gambia", "Ghana", "Guinea", "Guinea-Bissau", "Ivory Coast", "Kenya", "Lesotho", "Liberia", "Libya", "Madagascar", "Malawi", "Mali", "Mauritania", "Mauritius", "Morocco", "Mozambique", "Namibia", "Niger", "Nigeria", "Rwanda", "Sao Tome and Principe", "Senegal", "Seychelles", "Sierra Leone", "Somalia", "South Africa", "South Sudan", "Sudan", "Tanzania", "Togo", "Tunisia", "Uganda", "Zambia", "Zimbabwe"];
 const religions = ["Christianity", "Islam", "Traditional", "Other"];
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"];
+const categories = ["Personal folder", "Family folder", "Emergency folder", "ANC folder"];
 
 const Reception = () => {
   const { user } = useContext(AuthContext);
@@ -14,7 +15,7 @@ const Reception = () => {
   const [formData, setFormData] = useState({
     surname: '', other_names: '', phone: '', email: '', gender: 'Male', marital_status: 'Single', 
     dob: '', age: '', blood_group: 'Unknown', address: '', state_of_origin: 'Lagos', 
-    nationality: 'Nigeria', occupation: '', religion: 'Christianity',
+    nationality: 'Nigeria', occupation: '', religion: 'Christianity', category: 'Personal folder',
     next_of_kin_name: '', next_of_kin_relationship: '', next_of_kin_phone: '', next_of_kin_address: ''
   });
 
@@ -23,16 +24,12 @@ const Reception = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
-    // Auto-calculate Age from DOB
     if (name === 'dob') {
       const birthDate = new Date(value);
       const today = new Date();
       let calculatedAge = today.getFullYear() - birthDate.getFullYear();
       const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        calculatedAge--;
-      }
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) { calculatedAge--; }
       setFormData(prev => ({ ...prev, dob: value, age: calculatedAge >= 0 ? calculatedAge : '' }));
     } else {
       setFormData({ ...formData, [name]: value });
@@ -42,20 +39,15 @@ const Reception = () => {
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(`${API_URL}/api/patients/register`, {
-        ...formData,
-        hospital_id: user.hospital_id
-      });
+      const res = await axios.post(`${API_URL}/api/patients/register`, { ...formData, hospital_id: user.hospital_id });
       alert(`Patient registered! Unique Hospital Number: GMH-${res.data.id}`);
       setFormData({
         surname: '', other_names: '', phone: '', email: '', gender: 'Male', marital_status: 'Single', 
         dob: '', age: '', blood_group: 'Unknown', address: '', state_of_origin: 'Lagos', 
-        nationality: 'Nigeria', occupation: '', religion: 'Christianity',
+        nationality: 'Nigeria', occupation: '', religion: 'Christianity', category: 'Personal folder',
         next_of_kin_name: '', next_of_kin_relationship: '', next_of_kin_phone: '', next_of_kin_address: ''
       });
-    } catch (err) {
-      alert('Failed to register patient. Check all fields.');
-    }
+    } catch (err) { alert('Failed to register patient. Check all fields.'); }
   };
 
   const handleSearch = async (e) => {
@@ -63,9 +55,7 @@ const Reception = () => {
     try {
       const res = await axios.get(`${API_URL}/api/patients/search?query=${search}&hospital_id=${user.hospital_id}`);
       setResults(res.data);
-    } catch (err) {
-      alert('Search failed');
-    }
+    } catch (err) { alert('Search failed'); }
   };
 
   return (
@@ -92,6 +82,7 @@ const Reception = () => {
             <div style={styles.inputGroup}><label style={styles.label}>State of Origin</label><select name="state_of_origin" value={formData.state_of_origin} onChange={handleInputChange} style={styles.input}>{nigerianStates.map(s => <option key={s} value={s}>{s}</option>)}</select></div>
             <div style={styles.inputGroup}><label style={styles.label}>Occupation</label><input type="text" name="occupation" value={formData.occupation} onChange={handleInputChange} style={styles.input} /></div>
             <div style={styles.inputGroup}><label style={styles.label}>Religion</label><select name="religion" value={formData.religion} onChange={handleInputChange} style={styles.input}>{religions.map(r => <option key={r} value={r}>{r}</option>)}</select></div>
+            <div style={styles.inputGroup}><label style={styles.label}>Category (Folder)</label><select name="category" value={formData.category} onChange={handleInputChange} style={styles.input}>{categories.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
             <div style={styles.inputGroup} style={{gridColumn: 'span 2'}}><label style={styles.label}>Home Address</label><input type="text" name="address" value={formData.address} onChange={handleInputChange} style={styles.input} /></div>
           </div>
 
@@ -114,7 +105,6 @@ const Reception = () => {
           <input type="text" placeholder="Search by Name, Phone, or ID" value={search} onChange={(e) => setSearch(e.target.value)} style={styles.input} required />
           <button type="submit" style={styles.searchBtn}>Search</button>
         </form>
-        
         <div style={{ marginTop: '15px' }}>
           {results.map((p) => (
             <div key={p.id} style={styles.resultItem}>

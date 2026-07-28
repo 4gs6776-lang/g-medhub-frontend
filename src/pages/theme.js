@@ -12,7 +12,7 @@ export const colors = {
   textMuted: '#8892b0',        // Subtext / labels
   
   // Accents
-  cyan: '#00FFFF',             // Primary glowing accent
+  primary: '#A7F66F',          // Your new glowing lime green accent!
   gold: '#D4AF37',             // Secondary premium accent
   green: '#2ecc71',            // Success / Paid / Available
   red: '#e74c3c',              // Danger / Delete / Unpaid
@@ -24,9 +24,9 @@ export const styles = {
   // Reusable Glowing Separator Line
   separator: {
     height: '2px',
-    background: `linear-gradient(90deg, transparent, ${colors.cyan}80, transparent)`,
+    background: `linear-gradient(90deg, transparent, ${colors.primary}80, transparent)`,
     margin: '20px 0',
-    boxShadow: `0 0 10px ${colors.cyan}4D`,
+    boxShadow: `0 0 10px ${colors.primary}4D`,
   },
   // Reusable Premium Card
   card: {
@@ -36,7 +36,7 @@ export const styles = {
     borderRadius: '16px',
     marginBottom: '30px',
     boxShadow: '0 10px 30px rgba(0,0,0,0.3)',
-    border: `1px solid ${colors.cyan}1A`,
+    border: `1px solid ${colors.primary}1A`,
   },
   // Reusable Input Field
   input: {
@@ -44,7 +44,7 @@ export const styles = {
     padding: '12px',
     fontSize: '14px',
     borderRadius: '8px',
-    border: `1px solid ${colors.cyan}33`,
+    border: `1px solid ${colors.primary}33`,
     backgroundColor: colors.bgInput,
     color: colors.textWhite,
     outline: 'none',
@@ -53,7 +53,7 @@ export const styles = {
   // Reusable Primary Button
   buttonPrimary: {
     padding: '15px',
-    background: `linear-gradient(90deg, ${colors.cyan}, #00C6C6)`,
+    background: `linear-gradient(90deg, ${colors.primary}, #8ED94E)`,
     color: colors.bgDeep,
     border: 'none',
     borderRadius: '8px',

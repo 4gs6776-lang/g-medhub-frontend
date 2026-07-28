@@ -34,8 +34,31 @@ const UserManagement = () => {
       setFormData({ full_name: '', email: '', password: '', role: 'Doctor' });
       fetchStaff();
     } catch (err) {
-      // Show the EXACT error message from the backend
       alert(err.response?.data?.message || 'Failed to create staff account.');
+    }
+  };
+
+  const handleDelete = async (id, name) => {
+    if (window.confirm(`Are you sure you want to delete ${name}'s account? This cannot be undone.`)) {
+      try {
+        await axios.delete(`${API_URL}/api/users/${id}`);
+        alert('Staff account deleted.');
+        fetchStaff();
+      } catch (err) {
+        alert('Failed to delete account.');
+      }
+    }
+  };
+
+  const handleResetPassword = async (id, name) => {
+    const newPassword = prompt(`Enter the NEW password for ${name}:`, "1234");
+    if (newPassword === null) return; // User clicked cancel
+    
+    try {
+      await axios.put(`${API_URL}/api/users/${id}/reset-password`, { newPassword });
+      alert(`Password for ${name} has been reset successfully!`);
+    } catch (err) {
+      alert('Failed to reset password.');
     }
   };
 
@@ -94,7 +117,15 @@ const UserManagement = () => {
                   <h4 style={styles.staffName}>{s.full_name || 'Unknown'} {s.id === user.id && <span style={{fontSize: '12px', color: '#D4AF37'}}>(You)</span>}</h4>
                   <p style={styles.staffEmail}>✉️ {s.email}</p>
                 </div>
-                <span style={{...styles.badge, color: rc.color, backgroundColor: rc.bg, border: rc.border}}>{s.role}</span>
+                <div style={styles.actionArea}>
+                  <span style={{...styles.badge, color: rc.color, backgroundColor: rc.bg, border: rc.border, marginBottom: '5px'}}>{s.role}</span>
+                  <div style={styles.actionBtns}>
+                    <button onClick={() => handleResetPassword(s.id, s.full_name)} style={styles.resetBtn}>🔑 Reset Pass</button>
+                    {s.id !== user.id && (
+                      <button onClick={() => handleDelete(s.id, s.full_name)} style={styles.deleteBtn}>🗑️ Delete</button>
+                    )}
+                  </div>
+                </div>
               </div>
             );
           })
@@ -122,7 +153,11 @@ const styles = {
   staffDetails: { flex: 1 },
   staffName: { margin: 0, fontSize: '16px', color: '#e6f1ff' },
   staffEmail: { margin: '5px 0 0 0', fontSize: '14px', color: '#8892b0' },
-  badge: { padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }
+  actionArea: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end' },
+  actionBtns: { display: 'flex', gap: '8px' },
+  resetBtn: { padding: '6px 10px', backgroundColor: 'rgba(243, 156, 18, 0.1)', color: '#f39c12', border: '1px solid rgba(243, 156, 18, 0.3)', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
+  deleteBtn: { padding: '6px 10px', backgroundColor: 'rgba(231, 76, 60, 0.1)', color: '#e74c3c', border: '1px solid rgba(231, 76, 60, 0.3)', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
+  badge: { padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }
 };
 
 export default UserManagement;

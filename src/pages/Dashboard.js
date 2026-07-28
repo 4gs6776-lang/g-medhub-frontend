@@ -69,7 +69,6 @@ const Dashboard = () => {
     if (visibleNavItems.length > 0 && !visibleNavItems.some((item) => item.key === view)) {
       setView(visibleNavItems[0].key);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userRole]);
 
   // This decides what content to show in the main area

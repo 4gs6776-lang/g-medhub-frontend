@@ -56,7 +56,12 @@ const Dashboard = () => {
   ];
 
   // NEW: Only keep the buttons this logged-in person's role is allowed to see.
-  const visibleNavItems = navItems.filter((item) => item.roles.includes(user?.role));
+  // .toLowerCase() on both sides means it doesn't matter if the database
+  // has "Doctor", "doctor", or "DOCTOR" — they'll all match correctly.
+  const userRole = (user?.role || '').toLowerCase();
+  const visibleNavItems = navItems.filter((item) =>
+    item.roles.some((role) => role.toLowerCase() === userRole)
+  );
 
   // This decides what content to show in the main area
   const renderContent = () => {

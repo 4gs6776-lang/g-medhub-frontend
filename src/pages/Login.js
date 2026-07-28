@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import { colors, styles as themeStyles } from '../theme'; // Import the master theme
+import { colors, styles as themeStyles } from '../theme';
 
 const Login = () => {
   const { login } = useContext(AuthContext);
@@ -21,17 +21,17 @@ const Login = () => {
         width: '90%',
         maxWidth: '400px',
         textAlign: 'center',
-        boxShadow: `0 0 15px 4px ${colors.cyan}4D`,
-        border: `1px solid ${colors.cyan}`
+        boxShadow: `0 0 15px 4px ${colors.primary}4D`,
+        border: `1px solid ${colors.primary}`
       }}>
-        <h2 style={{ color: colors.cyan, marginBottom: '20px', fontFamily: 'Arial' }}>G-MedHub Login</h2>
+        <h2 style={{ color: colors.primary, marginBottom: '20px', fontFamily: 'Arial' }}>G-MedHub Login</h2>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <input
             type="email"
             placeholder="Email Address"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={themeStyles.input} // Using master input style
+            style={themeStyles.input}
             required
           />
           <input
@@ -39,12 +39,12 @@ const Login = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={themeStyles.input} // Using master input style
+            style={themeStyles.input}
             required
           />
-          <button type="submit" style={themeStyles.buttonPrimary}>Sign In</button> {/* Using master button style */}
+          <button type="submit" style={themeStyles.buttonPrimary}>Sign In</button>
         </form>
-        <p style={{ marginTop: '20px', color: colors.cyan, fontSize: '14px' }}>Hallel Hospital & Maternity System</p>
+        <p style={{ marginTop: '20px', color: colors.primary, fontSize: '14px' }}>Hallel Hospital & Maternity System</p>
       </div>
     </div>
   );

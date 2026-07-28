@@ -63,6 +63,15 @@ const Dashboard = () => {
     item.roles.some((role) => role.toLowerCase() === userRole)
   );
 
+  // NEW: As soon as we know the user's role, jump straight to THEIR section
+  // instead of showing the Super Admin "Platform Overview" screen by default.
+  useEffect(() => {
+    if (visibleNavItems.length > 0 && !visibleNavItems.some((item) => item.key === view)) {
+      setView(visibleNavItems[0].key);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userRole]);
+
   // This decides what content to show in the main area
   const renderContent = () => {
     if (view === 'reception') return <Reception />;

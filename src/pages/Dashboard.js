@@ -41,6 +41,23 @@ const Dashboard = () => {
     }
   };
 
+  // ============================================
+  // NEW: This list says WHO is allowed to see WHICH button.
+  // "key" = internal name, "label" = what shows on screen,
+  // "roles" = the list of job titles allowed to see this button.
+  // To add a new role to a button later, just add it to that button's "roles" array.
+  // ============================================
+  const navItems = [
+    { key: 'dashboard', label: 'Dashboard', roles: ['super_admin'] },
+    { key: 'reception', label: 'Reception', roles: ['super_admin', 'receptionist'] },
+    { key: 'doctor', label: 'Doctor', roles: ['super_admin', 'doctor'] },
+    { key: 'lab', label: 'Laboratory', roles: ['super_admin', 'lab_scientist'] },
+    { key: 'pharmacy', label: 'Pharmacy', roles: ['super_admin', 'pharmacist'] },
+  ];
+
+  // NEW: Only keep the buttons this logged-in person's role is allowed to see.
+  const visibleNavItems = navItems.filter((item) => item.roles.includes(user?.role));
+
   // This decides what content to show in the main area
   const renderContent = () => {
     if (view === 'reception') return <Reception />;
@@ -101,14 +118,19 @@ const Dashboard = () => {
       {/* Sidebar */}
       <div style={styles.sidebar}>
         <h2 style={styles.sidebarTitle}>G-MedHub</h2>
-        <p style={styles.sidebarSub}>Super Admin Panel</p>
+        <p style={styles.sidebarSub}>{user?.role}</p>
         
         <nav style={styles.nav}>
-          <button onClick={() => setView('dashboard')} style={view === 'dashboard' ? styles.navActive : styles.navItem}>Dashboard</button>
-          <button onClick={() => setView('reception')} style={view === 'reception' ? styles.navActive : styles.navItem}>Reception</button>
-          <button onClick={() => setView('doctor')} style={view === 'doctor' ? styles.navActive : styles.navItem}>Doctor</button>
-          <button onClick={() => setView('lab')} style={view === 'lab' ? styles.navActive : styles.navItem}>Laboratory</button>
-          <button onClick={() => setView('pharmacy')} style={view === 'pharmacy' ? styles.navActive : styles.navItem}>Pharmacy</button>
+          {/* CHANGED: loop over visibleNavItems instead of writing every button by hand */}
+          {visibleNavItems.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setView(item.key)}
+              style={view === item.key ? styles.navActive : styles.navItem}
+            >
+              {item.label}
+            </button>
+          ))}
         </nav>
       </div>
 
